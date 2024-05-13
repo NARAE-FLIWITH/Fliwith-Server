@@ -1,6 +1,7 @@
 package com.narae.fliwith.controller.openAPI;
 
 import com.narae.fliwith.dto.openAPI.DetailCommonRes;
+import com.narae.fliwith.dto.openAPI.DetailIntroRes;
 import com.narae.fliwith.dto.openAPI.DetailWithTourRes;
 import com.narae.fliwith.service.openAPI.TourService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,11 @@ public class TourController {
     @GetMapping("/tour/common/{contentId}")
     public DetailCommonRes.Response getDetailCommon(@PathVariable(value = "contentId") String contentId){
         return tourService.getDetailCommon(contentId);
+    }
+
+    @GetMapping("/tour/intro/{contentId}/{contentTypeId}")
+    public DetailIntroRes.Response getDetailIntro(@PathVariable(value = "contentId") String contentId, @PathVariable(value = "contentTypeId") String contentTypeId){
+        return tourService.getDetailIntro(contentId, contentTypeId);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.narae.fliwith.service.openAPI;
 
 import com.narae.fliwith.dto.openAPI.DetailCommonRes;
+import com.narae.fliwith.dto.openAPI.DetailIntroRes;
 import com.narae.fliwith.dto.openAPI.DetailWithTourRes;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,25 @@ public class TourService {
                 .bodyToMono(new ParameterizedTypeReference<DetailCommonRes.Root>() {
                 })
                 .map(DetailCommonRes.Root::getResponse)
+                .block();
+    }
+
+    public DetailIntroRes.Response getDetailIntro(String contentId, String contentTypeId){
+        return webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/detailIntro1")
+                                .queryParam("MobileOS", "AND")
+                                .queryParam("MobileApp", "fliwith")
+                                .queryParam("contentId", contentId)
+                                .queryParam("contentTypeId", contentTypeId)
+                                .queryParam("_type", "json")
+                                .queryParam("serviceKey", serviceKey)
+                                .build()
+                )
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<DetailIntroRes.Root>() {
+                })
+                .map(DetailIntroRes.Root::getResponse)
                 .block();
     }
 }
