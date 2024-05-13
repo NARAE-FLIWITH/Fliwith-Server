@@ -17,7 +17,7 @@ public class Location {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spot_id", referencedColumnName = "id")
     private Spot spot;
-    private int areaCode;
+
     private double latitude;
     private double longitude;
 }

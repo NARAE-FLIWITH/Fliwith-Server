@@ -21,5 +21,7 @@ public class Spot {
     private String thumbnail;
     private String tel;
     private String address;
+    private int areaCode;
+    private String contentType;
 
 }
