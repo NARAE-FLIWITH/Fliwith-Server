@@ -17,7 +17,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String exception = String.valueOf(request.getAttribute("exception"));
-
         //TODO: 조건별 예외 처리
         setResponse(response, SecurityExceptionList.ACCESS_DENIED);
     }

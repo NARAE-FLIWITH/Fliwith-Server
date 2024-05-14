@@ -90,7 +90,6 @@ public class TokenUtil {
 
         // UserDetails 객체를 만들어서 Authentication 리턴
         UserDetails principal = new User(claims.getSubject(), "", authorities);
-
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
@@ -100,12 +99,19 @@ public class TokenUtil {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             request.setAttribute("exception", "4043");
+            System.out.println("4043");
         } catch (ExpiredJwtException e) {
             request.setAttribute("exception", "4044");
+            System.out.println("4044");
+
         } catch (UnsupportedJwtException e) {
             request.setAttribute("exception", "4045");
+            System.out.println("4045");
+
         } catch (IllegalArgumentException e) {
             request.setAttribute("exception", "4046");
+            System.out.println("4046");
+
         }
         return false;
     }

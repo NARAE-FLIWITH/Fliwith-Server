@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration // IoC 빈(bean)을 등록
 @EnableWebSecurity // 필터 체인 관리 시작 어노테이션
@@ -30,11 +31,16 @@ public class SecurityConfig {
                 .sessionManagement(c->c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-
+                .exceptionHandling(ex->ex.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .anyRequest().permitAll()
-                );
+                                .requestMatchers("/user/*").permitAll()
+                                .anyRequest().authenticated()
+
+                )
+                .addFilterBefore(new JwtFilter(tokenUtil), UsernamePasswordAuthenticationFilter.class);
+
+
         return http.build();
     }
 
