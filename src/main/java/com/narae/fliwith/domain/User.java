@@ -21,6 +21,8 @@ public class User {
     private String nickname;
     @Enumerated(EnumType.STRING)
     private Disability disability;
-    //TODO: Role, 탈퇴상태 추가
+    @Enumerated(EnumType.STRING)
+    private Role role;
+    //TODO: 탈퇴상태 추가
 
 }
