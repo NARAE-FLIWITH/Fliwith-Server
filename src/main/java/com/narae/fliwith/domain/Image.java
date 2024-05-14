@@ -11,16 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class User {
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String email;
     @Column(columnDefinition = "TEXT")
-    private String pw;
-    private String nickname;
-    @Enumerated(EnumType.STRING)
-    private Disability disability;
-    //TODO: Role, 탈퇴상태 추가
-
+    private String originalName;
+    @Column(columnDefinition = "TEXT")
+    private String url;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id")
+    private Review review;
 }
