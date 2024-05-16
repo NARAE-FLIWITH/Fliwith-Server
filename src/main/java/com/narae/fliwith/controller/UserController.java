@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/signup")
+    @PostMapping("/signup/email")
     public ResponseEntity<BaseRes<Void>> signUp(@RequestBody SignUpReq signUpReq){
         userService.signUp(signUpReq);
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "회원가입에 성공했습니다."));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "이메일 회원가입에 성공했습니다."));
     }
 
     @PostMapping("/login")
