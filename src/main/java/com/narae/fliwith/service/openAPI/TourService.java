@@ -1,14 +1,23 @@
 package com.narae.fliwith.service.openAPI;
 
+import com.narae.fliwith.dto.TourRes.TourDetailRes;
+import com.narae.fliwith.dto.TourRes.TourType;
 import com.narae.fliwith.dto.openAPI.DetailCommonRes;
 import com.narae.fliwith.dto.openAPI.DetailIntroRes;
 import com.narae.fliwith.dto.openAPI.DetailWithTourRes;
+import com.narae.fliwith.dto.openAPI.DetailWithTourRes.Item;
+import com.narae.fliwith.dto.openAPI.LocationBasedListRes;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
 @Transactional
@@ -19,7 +28,7 @@ public class TourService {
     @Value("${service.key}")
     private String serviceKey;
 
-    public DetailWithTourRes.Response getDetailWithTour(String contentId){
+    public Mono<Item> getDetailWithTour(String contentId) {
         return webClient.get()
                 .uri(uriBuilder ->
                     uriBuilder.path("/detailWithTour1")
@@ -33,11 +42,11 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailWithTourRes.Root>() {
                 })
-                .map(DetailWithTourRes.Root::getResponse)
-                .block();
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
+
     }
 
-    public DetailCommonRes.Response getDetailCommon(String contentId){
+    public Mono<DetailCommonRes.Item> getDetailCommon(String contentId) {
         return webClient.get()
                 .uri(uriBuilder ->
                     uriBuilder.path("/detailCommon1")
@@ -55,11 +64,10 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailCommonRes.Root>() {
                 })
-                .map(DetailCommonRes.Root::getResponse)
-                .block();
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
     }
 
-    public DetailIntroRes.Response getDetailIntro(String contentId, String contentTypeId){
+    public Mono<DetailIntroRes.Item> getDetailIntro(String contentId, String contentTypeId) {
         return webClient.get()
                 .uri(uriBuilder ->
                         uriBuilder.path("/detailIntro1")
@@ -74,7 +82,45 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailIntroRes.Root>() {
                 })
-                .map(DetailIntroRes.Root::getResponse)
-                .block();
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
+    }
+
+    public List<TourType> getTourByType(String latitude, String longitude, String contentTypeId) {
+        //lat, lon 주변 몇 km 이내  contentTypeId인 관광지 조회 return
+        return webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/locationBasedList1")
+                                .queryParam("MobileOS", "AND")
+                                .queryParam("MobileApp", "fliwith")
+                                .queryParam("mapX", longitude)
+                                .queryParam("mapY", String.valueOf(latitude))
+                                .queryParam("radius", "500")
+                                .queryParam("_type", "json")
+                                .queryParam("contentTypeId", String.valueOf(contentTypeId))
+                                .queryParam("serviceKey", serviceKey)
+                                .build()
+                )
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<LocationBasedListRes.Root>() {
+                })
+                .map(root -> root.getResponse().getBody().getItems().getItem().stream()
+                        .map(item -> new TourType(Integer.parseInt(item.contenttypeid), Integer.parseInt(item.contentid)))
+                        .collect(Collectors.toList()))
+                .onErrorReturn(DecodingException.class, new ArrayList<>())
+                .blockFirst();
+        //TODO: DB에 관광지 미리 저장해두고, 조회하는 걸로 로직 변경하기
+
+    }
+
+    public TourDetailRes getTour(String contentTypeId, String contentId) {
+        DetailWithTourRes.Item detailWithTour = getDetailWithTour(contentId).block();
+        DetailIntroRes.Item detailIntro = getDetailIntro(contentId, contentTypeId).block();
+        DetailCommonRes.Item detailCommon = getDetailCommon(contentId).block();
+
+        return TourDetailRes.builder()
+                .detailWithTour(detailWithTour)
+                .detailIntro(detailIntro)
+                .detailCommon(detailCommon)
+                .build();
     }
 }
