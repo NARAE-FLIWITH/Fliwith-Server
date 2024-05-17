@@ -5,6 +5,7 @@ import com.narae.fliwith.config.security.util.TokenUtil;
 import com.narae.fliwith.domain.Role;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
+import com.narae.fliwith.dto.UserReq.EmailReq;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.UserRepository;
@@ -67,5 +68,12 @@ public class UserService {
 
         // 5. 토큰 발급
         return tokenRes;
+    }
+
+    public void emailCheck(EmailReq emailReq) {
+        if(userRepository.existsByEmail(emailReq.getEmail())){
+            throw new DuplicateUserEmailException();
+        }
+
     }
 }

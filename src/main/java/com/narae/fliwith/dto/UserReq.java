@@ -28,4 +28,12 @@ public class UserReq {
         private String email;
         private String password;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class EmailReq{
+        private String email;
+    }
 }

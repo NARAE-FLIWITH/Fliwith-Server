@@ -28,4 +28,12 @@ public class UserController {
     public ResponseEntity<BaseRes<TokenRes>> signUp(@RequestBody LogInReq logInReq) {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "로그인에 성공했습니다.", userService.logIn(logInReq)));
     }
+
+    @PostMapping("/email")
+    public ResponseEntity<BaseRes<Void>> emailCheck(@RequestBody EmailReq emailReq) {
+        userService.emailCheck(emailReq);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "사용할 수 있는 이메일입니다."));
+    }
+
+
 }
