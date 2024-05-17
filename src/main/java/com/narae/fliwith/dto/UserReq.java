@@ -36,4 +36,12 @@ public class UserReq {
     public static class EmailReq{
         private String email;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class NicknameReq{
+        private String nickname;
+    }
 }

@@ -35,5 +35,11 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "사용할 수 있는 이메일입니다."));
     }
 
+    @PostMapping("/nickname")
+    public ResponseEntity<BaseRes<Void>> nicknameCheck(@RequestBody NicknameReq nicknameReq) {
+        userService.nicknameCheck(nicknameReq);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "사용할 수 있는 닉네임입니다."));
+    }
+
 
 }

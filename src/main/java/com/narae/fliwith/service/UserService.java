@@ -6,7 +6,9 @@ import com.narae.fliwith.domain.Role;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
 import com.narae.fliwith.dto.UserReq.EmailReq;
+import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
+import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -73,6 +75,13 @@ public class UserService {
     public void emailCheck(EmailReq emailReq) {
         if(userRepository.existsByEmail(emailReq.getEmail())){
             throw new DuplicateUserEmailException();
+        }
+
+    }
+
+    public void nicknameCheck(NicknameReq nicknameReq) {
+        if(userRepository.existsByNickname(nicknameReq.getNickname())){
+            throw new DuplicateUserNicknameException();
         }
 
     }
