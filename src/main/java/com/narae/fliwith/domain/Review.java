@@ -36,7 +36,7 @@ public class Review {
     private String content;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "review")
     private List<Image> images;
-    @ColumnDefault("0L")
+    @ColumnDefault("0")
     private Long likes;
     @CreatedDate
     @Column(updatable = false)

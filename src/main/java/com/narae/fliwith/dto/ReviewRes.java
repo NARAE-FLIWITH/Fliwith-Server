@@ -26,4 +26,26 @@ public class ReviewRes {
         private boolean isMine;
 
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ReviewItem {
+        private String image;
+        private String nickname;
+        private Disability disability;
+        private Long likes;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ReviewItemRes{
+        List<ReviewItem> reviews;
+        int pageNo;
+        int lastPageNo;
+
+    }
 }
