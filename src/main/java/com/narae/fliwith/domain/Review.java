@@ -1,6 +1,7 @@
 package com.narae.fliwith.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.narae.fliwith.dto.ReviewReq;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,4 +47,14 @@ public class Review {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+
+    public void updateReview(ReviewReq.UpdateReviewReq req){
+        if(req.getSpot() != null){
+            spot = req.getSpot();
+        }
+        if(req.getContent() != null){
+            content = req.getContent();
+        }
+    }
 }

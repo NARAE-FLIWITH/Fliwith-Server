@@ -32,4 +32,9 @@ public class ReviewController {
         reviewService.deleteReview(principal, reviewId);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 삭제에 성공했습니다."));
     }
+
+    @PatchMapping("/{reviewId}")
+    public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> updateReview(Principal principal, @PathVariable Long reviewId, @RequestBody ReviewReq.WriteReviewReq writeReviewReq) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 수정에 성공했습니다.", reviewService.updateReview(principal, reviewId, writeReviewReq)));
+    }
 }
