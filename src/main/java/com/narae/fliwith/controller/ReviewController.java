@@ -26,4 +26,10 @@ public class ReviewController {
     public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> getReview(Principal principal, @PathVariable Long reviewId) {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 상세조회에 성공했습니다.", reviewService.getReviewDetail(principal, reviewId)));
     }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<BaseRes<Void>> deleteReview(Principal principal, @PathVariable Long reviewId) {
+        reviewService.deleteReview(principal, reviewId);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 삭제에 성공했습니다."));
+    }
 }

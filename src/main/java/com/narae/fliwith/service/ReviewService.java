@@ -6,6 +6,7 @@ import com.narae.fliwith.domain.Spot;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.ReviewReq;
 import com.narae.fliwith.dto.ReviewRes;
+import com.narae.fliwith.exception.review.ReviewDeleteFailException;
 import com.narae.fliwith.exception.review.ReviewFindFailException;
 import com.narae.fliwith.exception.spot.SpotFindFailException;
 import com.narae.fliwith.exception.user.LogInFailException;
@@ -51,5 +52,19 @@ public class ReviewService {
                 .isMine(isMine)
                 .likes(review.getLikes())
                 .build();
+    }
+
+    public void deleteReview(Principal principal, Long reviewId) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+
+        Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
+
+        boolean isMine = user.getId().equals(review.getUser().getId());
+        if(!isMine){
+            throw new ReviewDeleteFailException();
+        }
+
+        reviewRepository.delete(review);
+
     }
 }
