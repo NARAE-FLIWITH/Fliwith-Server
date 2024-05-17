@@ -46,4 +46,10 @@ public class TourController {
 
     }
 
+    @GetMapping("/admin/save")
+    public ResponseEntity<BaseRes<Void>> saveTour(@RequestParam String contentTypeId){
+        tourService.saveAllSpots(contentTypeId);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 타입 리스트를 저장하는데 성공했습니다."));
+    }
+
 }

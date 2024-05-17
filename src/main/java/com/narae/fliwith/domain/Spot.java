@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Spot {
     @Id
-    private Long id;
+    private int id;
     private String title;
     private String thumbnail;
     private String tel;
     private String address;
     private int areaCode;
-    private String contentType;
+    private int contentTypeId;
 
 }

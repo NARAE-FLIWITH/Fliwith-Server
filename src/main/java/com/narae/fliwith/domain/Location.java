@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Location {
     @Id
-    private Long id;
+    private int id;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spot_id", referencedColumnName = "id")
     private Spot spot;
