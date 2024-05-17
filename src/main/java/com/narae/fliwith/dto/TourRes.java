@@ -39,4 +39,13 @@ public class TourRes {
         DetailCommonRes.Item detailCommon;
 
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TourName{
+        int contentId;
+        String name;
+    }
 }
