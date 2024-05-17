@@ -44,6 +44,7 @@ public class ReviewService {
         boolean isMine = user.getId().equals(review.getUser().getId());
 
         return ReviewRes.ReviewDetailRes.builder()
+                .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
                 .disability(review.getUser().getDisability())
                 .createdAt(review.getCreatedAt())
@@ -87,6 +88,7 @@ public class ReviewService {
 
         review.updateReview(updateReviewReq);
         return ReviewRes.ReviewDetailRes.builder()
+                .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
                 .disability(review.getUser().getDisability())
                 .createdAt(review.getCreatedAt())
