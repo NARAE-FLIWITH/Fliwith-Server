@@ -91,7 +91,6 @@ public class TourService {
     }
 
     public List<TourType> getTourByType(String latitude, String longitude, String contentTypeId) {
-        //lat, lon 주변 몇 km 이내  contentTypeId인 관광지 조회 return
         return webClient.get()
                 .uri(uriBuilder ->
                         uriBuilder.path("/locationBasedList1")
@@ -127,24 +126,6 @@ public class TourService {
                 .detailIntro(detailIntro)
                 .detailCommon(detailCommon)
                 .build();
-    }
-
-    public List<TourRes.TourName> getSerachKeyword(String keyword) {
-        return webClient.get()
-                .uri(uriBuilder ->
-                        uriBuilder.path("/searchKeyword1")
-                                .queryParam("MobileOS", "AND")
-                                .queryParam("MobileApp", "fliwith")
-                                .queryParam("keyword", keyword)
-                                .queryParam("_type", "json")
-                                .queryParam("serviceKey", serviceKey)
-                                .build()
-                )
-                .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<SearchKeywordRes.Root>() {
-                })
-                .map(root -> root.getResponse().getBody().getItems().getItem().stream().map(item -> new TourRes.TourName(Integer.parseInt(item.contentid), item.title)).collect(Collectors.toList()))
-                .blockFirst();
     }
 
     public AreaBasedListRes.Response getAreaBasedList(String contentTypeId, int pageNo) {
