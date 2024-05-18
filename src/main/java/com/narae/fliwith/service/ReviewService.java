@@ -143,7 +143,7 @@ public class ReviewService {
 
         //인기순 like
         if("like".equals(order)){
-            reviewsPage = reviewRepository.findAllByOrderByLikesDesc(pageable);
+            reviewsPage = reviewRepository.findAllByOrderByLikesDescCreatedAtDesc(pageable);
             reviews = reviewsPage.getContent();
             return ReviewItemRes.builder()
                     .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
