@@ -1,6 +1,7 @@
 package com.narae.fliwith.dto;
 
 import com.narae.fliwith.domain.Spot;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class ReviewReq {
     public static class WriteReviewReq{
         private int contentId;
         private String content;
+        private List<String> images;
     }
 
     @Getter
@@ -33,5 +35,6 @@ public class ReviewReq {
     public static class UpdateReviewReq{
         private Spot spot;
         private String content;
+        private List<String> images;
     }
 }

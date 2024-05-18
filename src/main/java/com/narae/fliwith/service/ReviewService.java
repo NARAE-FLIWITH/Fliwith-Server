@@ -18,6 +18,7 @@ import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,7 +41,11 @@ public class ReviewService {
     public void writeReview(Principal principal, ReviewReq.WriteReviewReq req) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
         Spot spot = spotRepository.findById(req.getContentId()).orElseThrow(SpotFindFailException::new);
-        Review review = Review.builder().likes(0L).content(req.getContent()).user(user).spot(spot).build();
+        Review review = Review.builder().likes(0L).content(req.getContent()).user(user).spot(spot).images(new ArrayList<>()).build();
+        for(String url : req.getImages()){
+            review.getImages().add(Image.builder().url(url).review(review).build());
+        }
+
         reviewRepository.save(review);
     }
 
@@ -92,9 +97,11 @@ public class ReviewService {
                 ReviewReq.UpdateReviewReq.builder()
                         .content(req.getContent())
                         .spot(spotRepository.findById(req.getContentId()).orElseThrow(SpotFindFailException::new))
+                        .images(req.getImages())
                         .build();
 
         review.updateReview(updateReviewReq);
+
         return ReviewRes.ReviewDetailRes.builder()
                 .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
@@ -105,7 +112,6 @@ public class ReviewService {
                 .isMine(isMine)
                 .likes(review.getLikes())
                 .build();
-
     }
 
 
