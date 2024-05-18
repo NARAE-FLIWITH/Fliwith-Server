@@ -32,6 +32,7 @@ public class ReviewRes {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReviewItem {
+        private Long reviewId;
         private String image;
         private String nickname;
         private Disability disability;

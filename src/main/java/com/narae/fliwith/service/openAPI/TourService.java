@@ -169,7 +169,7 @@ public class TourService {
                     .thumbnail(item.getFirstimage())
                     .tel(item.getTel())
                     .address(item.getAddr1() + " "+item.getAddr2())
-                    .areaCode(Integer.parseInt(item.getAreacode()))
+                    .areaCode(Integer.parseInt(item.getAreacode())) //TODO: 숙박타입에서 areaCode 빈칸인 관광지가 존재 -> 에러 발생
                     .contentTypeId(Integer.parseInt(item.getContenttypeid()))
                     .build();
 
