@@ -16,9 +16,9 @@ public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id")
-    private User writer;
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "writer_id")
+//    private User writer;
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "liker_id")
     private User liker;

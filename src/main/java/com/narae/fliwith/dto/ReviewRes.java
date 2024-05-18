@@ -49,4 +49,12 @@ public class ReviewRes {
         int lastPageNo;
 
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LikeUnlikeRes{
+        boolean like;
+    }
 }

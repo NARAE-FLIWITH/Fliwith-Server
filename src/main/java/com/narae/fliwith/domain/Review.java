@@ -64,4 +64,15 @@ public class Review {
         }
 
     }
+
+    public void unlike() {
+        likes--;
+        if(likes<0){
+            likes = 0L;
+        }
+    }
+
+    public void like() {
+        likes++;
+    }
 }
