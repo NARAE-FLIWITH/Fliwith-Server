@@ -127,10 +127,10 @@ public class ReviewService {
             reviewsPage = reviewRepository.findAllByOrderByCreatedAtDesc(pageable);
             reviews = reviewsPage.getContent();
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
+                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
-                    .lastPageNo(pageable.getPageSize())
+                    .lastPageNo(reviewsPage.getTotalPages()-1)
                     .build();
 
 
@@ -141,10 +141,10 @@ public class ReviewService {
             reviewsPage = reviewRepository.findAllByOrderByLikesDesc(pageable);
             reviews = reviewsPage.getContent();
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
+                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
-                    .lastPageNo(pageable.getPageSize())
+                    .lastPageNo(reviewsPage.getTotalPages()-1)
                     .build();
         }
 
