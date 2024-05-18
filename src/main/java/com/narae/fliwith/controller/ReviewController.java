@@ -59,4 +59,11 @@ public class ReviewController {
     public ResponseEntity<BaseRes<ImageRes.PresignedUrlRes>> updateReview(Principal principal, @RequestBody PresignedUrlReq presignedUrlReq) {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "presignedUrl 생성에 성공했습니다.", s3Service.issuePresignedUrl(principal, presignedUrlReq)));
     }
+
+    @PostMapping("/{reviewId}")
+    public ResponseEntity<BaseRes<ReviewRes.LikeUnlikeRes>> likeUnlikeReview(Principal principal, @PathVariable Long reviewId) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 좋아요 또는 좋아요 취소 누르기에 성공했습니다.", reviewService.likeUnlikeReview(principal, reviewId)));
+    }
+
+
 }

@@ -1,11 +1,13 @@
 package com.narae.fliwith.service;
 
 import com.narae.fliwith.domain.Image;
+import com.narae.fliwith.domain.Like;
 import com.narae.fliwith.domain.Review;
 import com.narae.fliwith.domain.Spot;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.ReviewReq;
 import com.narae.fliwith.dto.ReviewRes;
+import com.narae.fliwith.dto.ReviewRes.LikeUnlikeRes;
 import com.narae.fliwith.dto.ReviewRes.ReviewItem;
 import com.narae.fliwith.dto.ReviewRes.ReviewItemRes;
 import com.narae.fliwith.dto.TourRes.TourName;
@@ -14,12 +16,14 @@ import com.narae.fliwith.exception.review.ReviewFindFailException;
 import com.narae.fliwith.exception.review.ReviewListException;
 import com.narae.fliwith.exception.spot.SpotFindFailException;
 import com.narae.fliwith.exception.user.LogInFailException;
+import com.narae.fliwith.repository.LikeRepository;
 import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +40,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final SpotRepository spotRepository;
+    private final LikeRepository likeRepository;
 
 
     public void writeReview(Principal principal, ReviewReq.WriteReviewReq req) {
@@ -160,5 +165,24 @@ public class ReviewService {
                 Collectors.toList());
 
 
+    }
+
+    public LikeUnlikeRes likeUnlikeReview(Principal principal, Long reviewId) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+        AtomicBoolean like = new AtomicBoolean(true);
+
+        Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
+        likeRepository.findByLikerAndReview(user, review).ifPresentOrElse(l -> {
+            review.unlike();
+            likeRepository.delete(l);
+            like.set(false);
+        }, () -> {
+            review.like();
+            likeRepository.save(Like.builder().liker(user).review(review).build());
+        });
+
+        return LikeUnlikeRes.builder()
+                .like(like.get())
+                .build();
     }
 }
