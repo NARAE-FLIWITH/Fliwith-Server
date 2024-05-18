@@ -74,7 +74,7 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         envs: GITHUB_SHA
         script: |
-          docker rmi $(docker images -q)
+          docker rmi $(docker images -q) -f
           docker pull ${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}
           docker tag ${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }} ${{ secrets.PROJECT_NAME }}
           docker stop ${{ secrets.PROJECT_NAME }} || true
