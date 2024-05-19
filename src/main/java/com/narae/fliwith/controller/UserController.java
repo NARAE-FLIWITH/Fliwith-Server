@@ -1,17 +1,21 @@
 package com.narae.fliwith.controller;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
+import com.narae.fliwith.config.security.dto.ReissueTokenRes;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.dto.UserReq.*;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.dto.base.BaseRes;
 import com.narae.fliwith.service.UserService;
-import java.security.Principal;
+import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,8 +49,13 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<BaseRes<ProfileRes>> getProfile(Principal principal){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "프로필 조회에 성공했습니다.", userService.getProfile(principal)));
+    public ResponseEntity<BaseRes<ProfileRes>> getProfile(@AuthenticationPrincipal CustomUser customUser){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "프로필 조회에 성공했습니다.", userService.getProfile(customUser.getEmail())));
+    }
+
+    @GetMapping("/reissue")
+    public ResponseEntity<BaseRes<ReissueTokenRes>> reissue(@RequestHeader(value = "RefreshToken") String token, ServletRequest request){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "토큰 재발급에 성공했습니다.", userService.reissue(token, request)));
     }
 
 

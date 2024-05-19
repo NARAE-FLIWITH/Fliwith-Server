@@ -18,7 +18,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String exception = String.valueOf(request.getAttribute("exception"));
         //TODO: 조건별 예외 처리
-        setResponse(response, SecurityExceptionList.ACCESS_DENIED);
+        if("S0004".equals(exception)){
+            setResponse(response, SecurityExceptionList.EXPIRED_TOKEN_ERROR);
+        } else{
+            setResponse(response, SecurityExceptionList.ACCESS_DENIED);
+        }
+
     }
 
     private void setResponse(HttpServletResponse response, SecurityExceptionList exceptionCode) throws IOException {
