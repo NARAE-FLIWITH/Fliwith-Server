@@ -1,5 +1,7 @@
 package com.narae.fliwith.controller.openAPI;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
+import com.narae.fliwith.dto.TourReq.AiTourReq;
 import com.narae.fliwith.dto.TourRes.TourDetailRes;
 import com.narae.fliwith.dto.TourRes.TourType;
 import com.narae.fliwith.dto.base.BaseRes;
@@ -8,8 +10,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,6 +39,12 @@ public class TourController {
     public ResponseEntity<BaseRes<Void>> saveTour(@RequestParam String contentTypeId){
         tourService.saveAllSpots(contentTypeId);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 타입 목록을 저장하는데 성공했습니다."));
+    }
+
+    @PostMapping("/tour/ai")
+    public ResponseEntity<BaseRes<TourDetailRes>> getAiTour(@AuthenticationPrincipal CustomUser customUser,  @RequestBody AiTourReq aiTourReq){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "추천 관광지를 찾는데 성공했습니다.", tourService.getAiTour(customUser.getEmail(), aiTourReq)));
+
     }
 
 }
