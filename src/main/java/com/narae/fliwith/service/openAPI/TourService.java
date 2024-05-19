@@ -1,18 +1,30 @@
 package com.narae.fliwith.service.openAPI;
 
+import com.narae.fliwith.domain.Disability;
 import com.narae.fliwith.domain.Location;
 import com.narae.fliwith.domain.Review;
 import com.narae.fliwith.domain.Spot;
+import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.ReviewRes.ReviewItem;
+import com.narae.fliwith.dto.TourReq.AiTourParams;
+import com.narae.fliwith.dto.TourReq.AiTourReq;
+import com.narae.fliwith.dto.TourRes.TourAsk;
 import com.narae.fliwith.dto.TourRes.TourDetailRes;
 import com.narae.fliwith.dto.TourRes.TourType;
 import com.narae.fliwith.dto.openAPI.*;
 import com.narae.fliwith.exception.spot.SpotFindFailException;
+import com.narae.fliwith.exception.tour.NotFoundAiTourException;
+import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.LocationRepository;
 import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
+import com.narae.fliwith.repository.UserRepository;
+import com.theokanning.openai.completion.chat.ChatCompletionRequest;
+import com.theokanning.openai.completion.chat.ChatMessage;
+import com.theokanning.openai.service.OpenAiService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +47,18 @@ public class TourService {
     @Value("${service.key}")
     private String serviceKey;
 
+    private static final String MODEL = "gpt-3.5-turbo";
+
+    private OpenAiService openAiService;
+
+    @Value("${chatgpt.key}")
+    private String gptKey;
+
+
     private final SpotRepository spotRepository;
     private final LocationRepository locationRepository;
     private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
     public Mono<DetailWithTourRes.Item> getDetailWithTour(String contentId) {
         return webClient.get()
@@ -186,7 +207,7 @@ public class TourService {
                     .thumbnail(item.getFirstimage())
                     .tel(item.getTel())
                     .address(item.getAddr1() + " "+item.getAddr2())
-                    .areaCode(Integer.parseInt(item.getAreacode())) //TODO: 숙박타입에서 areaCode 빈칸인 관광지가 존재 -> 에러 발생
+                    .areaCode(item.getAreacode())
                     .contentTypeId(Integer.parseInt(item.getContenttypeid()))
                     .build();
 
@@ -200,5 +221,110 @@ public class TourService {
                                             .longitude(Double.parseDouble(item.getMapx())).build();
             locationRepository.save(location);
         }
+    }
+
+    private AreaBasedListRes.Body getAreaBasedListWithAreaCode(String contentTypeId, String areaCode, int pageNo) {
+        return webClient.get()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/areaBasedList1")
+                                .queryParam("pageNo", pageNo)
+                                .queryParam("MobileOS", "AND")
+                                .queryParam("MobileApp", "fliwith")
+                                .queryParam("contentTypeId", contentTypeId)
+                                .queryParam("areaCode", areaCode)
+                                .queryParam("_type", "json")
+                                .queryParam("serviceKey", serviceKey)
+                                .build()
+                )
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<AreaBasedListRes.Root>() {
+                }).map(root -> root.getResponse().getBody())
+                .blockFirst();
+    }
+
+    public TourDetailRes getAiTour(String email, AiTourReq aiTourReq) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+
+        AiTourParams params = AiTourParams.from(aiTourReq);
+        List<TourAsk> askList = new ArrayList<>();
+        int pageNo = 0;
+        int totalItems = 0;
+        int itemsPerPage = 10;
+        List<TourAsk> spotList;
+
+        List<String> contentTypeIds;
+        if (params.getContentTypeId().equals("0")) {
+            contentTypeIds = List.of("12", "14", "32", "38", "39");
+        } else {
+            contentTypeIds = Collections.singletonList(params.getContentTypeId());
+        }
+
+        for (String contentTypeId : contentTypeIds) {
+            do {
+                AreaBasedListRes.Body body = getAreaBasedListWithAreaCode(contentTypeId, params.getAreaCode(), pageNo);
+                totalItems = body.getTotalCount();
+                spotList = body.getItems().getItem().stream().map(item -> TourAsk.builder().name(item.getTitle()).contentId(item.getContentid()).contentTypeId(item.getContenttypeid()).build()).collect(Collectors.toList());
+
+                for (TourAsk tourAsk : spotList) {
+                    String contentId = String.valueOf(tourAsk.getContentId());
+                    DetailWithTourRes.Item detailWithTour = getDetailWithTour(contentId).block();
+                    if (isServiceAvailable(params.getDisability(), detailWithTour)) {
+                        askList.add(tourAsk);
+                    }
+                }
+
+                pageNo++;
+                if(askList.size()>=10){
+                    break;
+                }
+
+            } while ((pageNo - 1) * itemsPerPage < totalItems);
+            if(askList.size()>=10){
+                break;
+            }
+        }
+
+        //gpt
+        if(!askList.isEmpty()){
+            StringBuilder sb = new StringBuilder();
+            for (TourAsk tourAsk : askList) {
+                sb.append(tourAsk.getName()).append(", ");
+            }
+            sb.delete(sb.length() - 2, sb.length());
+            String gptRecommend = createGptRecommend(sb.toString(), params);
+//            System.out.println(gptAnswer);
+            TourAsk gptChoice = askList.stream().filter(tourAsk -> gptRecommend.contains(tourAsk.getName())).findFirst().get();
+            return getTour(gptChoice.getContentTypeId(), gptChoice.getContentId());
+        }
+
+
+        throw new NotFoundAiTourException();
+    }
+
+    private boolean isServiceAvailable(Disability disability, DetailWithTourRes.Item detailWithTour) {
+        switch (disability) {
+            case PHYSICAL:
+                return detailWithTour.getPublictransport() != null && !detailWithTour.getPublictransport().isEmpty();
+            case VISUAL:
+                return detailWithTour.getBraileblock() != null && !detailWithTour.getBraileblock().isEmpty();
+            case HEARING:
+                return detailWithTour.getAudioguide() != null && !detailWithTour.getAudioguide().isEmpty();
+            default:
+                return true;
+        }
+    }
+
+    private String createGptRecommend(String content, AiTourParams params){
+        this.openAiService = new OpenAiService(gptKey);
+
+        String prompt = content + "중에 갈 만한 관광지를 추천해줘. "+params.getDisability().getDisability()+ "을 가진 사람과 함께 "+params.getVisitedDate()+ "에 여행할 거고, 총 여행 인원은 "+params.getPeopleNum()+ "명 이야. 내가 말한 것 중에서 1개의 관광지 이름만 말해줘.";
+//        System.out.println("prompt: "+prompt);
+        ChatCompletionRequest requester = ChatCompletionRequest.builder()
+                .model(MODEL)
+                .maxTokens(2048)
+                .messages(List.of(
+                        new ChatMessage("user", prompt)
+                )).build();
+        return openAiService.createChatCompletion(requester).getChoices().get(0).getMessage().getContent();
     }
 }

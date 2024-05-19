@@ -50,4 +50,14 @@ public class TourRes {
         int contentId;
         String name;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TourAsk{
+        String contentTypeId;
+        String contentId;
+        String name;
+    }
 }
