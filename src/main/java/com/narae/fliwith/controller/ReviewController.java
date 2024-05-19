@@ -65,5 +65,15 @@ public class ReviewController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 좋아요 또는 좋아요 취소 누르기에 성공했습니다.", reviewService.likeUnlikeReview(principal, reviewId)));
     }
 
+    @GetMapping("/list/like")
+    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewLikeList(Principal principal, @RequestParam int pageNo){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 좋아요 한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewLikeList(principal, pageNo)));
+    }
+
+    @GetMapping("/list/write")
+    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewWriteList(Principal principal, @RequestParam int pageNo){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 작성한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewWriteList(principal, pageNo)));
+    }
+
 
 }

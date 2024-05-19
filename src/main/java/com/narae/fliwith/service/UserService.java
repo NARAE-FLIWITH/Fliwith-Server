@@ -7,11 +7,13 @@ import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
 import com.narae.fliwith.dto.UserReq.EmailReq;
 import com.narae.fliwith.dto.UserReq.NicknameReq;
+import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -84,5 +86,13 @@ public class UserService {
             throw new DuplicateUserNicknameException();
         }
 
+    }
+
+    public ProfileRes getProfile(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+        return ProfileRes.builder()
+                .disability(user.getDisability())
+                .nickname(user.getNickname())
+                .build();
     }
 }

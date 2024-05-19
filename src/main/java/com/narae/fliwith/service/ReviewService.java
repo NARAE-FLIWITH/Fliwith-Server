@@ -46,7 +46,7 @@ public class ReviewService {
     public void writeReview(Principal principal, ReviewReq.WriteReviewReq req) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
         Spot spot = spotRepository.findById(req.getContentId()).orElseThrow(SpotFindFailException::new);
-        Review review = Review.builder().likes(0L).content(req.getContent()).user(user).spot(spot).images(new ArrayList<>()).build();
+        Review review = Review.builder().likes(new ArrayList<>()).content(req.getContent()).user(user).spot(spot).images(new ArrayList<>()).build();
         for(String url : req.getImages()){
             review.getImages().add(Image.builder().url(url).review(review).build());
         }
@@ -69,7 +69,7 @@ public class ReviewService {
                 .images(review.getImages().stream().map(Image::getUrl).collect(Collectors.toList()))
                 .nickname(review.getUser().getNickname())
                 .isMine(isMine)
-                .likes(review.getLikes())
+                .likes((long) review.getLikes().size())
                 .build();
     }
 
@@ -115,7 +115,7 @@ public class ReviewService {
                 .images(review.getImages().stream().map(Image::getUrl).collect(Collectors.toList()))
                 .nickname(review.getUser().getNickname())
                 .isMine(isMine)
-                .likes(review.getLikes())
+                .likes((long) review.getLikes().size())
                 .build();
     }
 
@@ -127,15 +127,18 @@ public class ReviewService {
 
         Page<Review> reviewsPage;
         List<Review> reviews;
+        int lastPageNo;
         //최신순 recent
         if("recent".equals(order)){
             reviewsPage = reviewRepository.findAllByOrderByCreatedAtDesc(pageable);
             reviews = reviewsPage.getContent();
+            lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
+                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(),
+                            (long) review.getLikes().size())).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
-                    .lastPageNo(reviewsPage.getTotalPages()-1)
+                    .lastPageNo(lastPageNo)
                     .build();
 
 
@@ -145,11 +148,12 @@ public class ReviewService {
         if("like".equals(order)){
             reviewsPage = reviewRepository.findAllByOrderByLikesDescCreatedAtDesc(pageable);
             reviews = reviewsPage.getContent();
+            lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), review.getLikes())).collect(
+                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
-                    .lastPageNo(reviewsPage.getTotalPages()-1)
+                    .lastPageNo(lastPageNo)
                     .build();
         }
 
@@ -173,16 +177,51 @@ public class ReviewService {
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
         likeRepository.findByLikerAndReview(user, review).ifPresentOrElse(l -> {
-            review.unlike();
             likeRepository.delete(l);
             like.set(false);
         }, () -> {
-            review.like();
             likeRepository.save(Like.builder().liker(user).review(review).build());
         });
 
         return LikeUnlikeRes.builder()
                 .like(like.get())
                 .build();
+    }
+
+
+    public ReviewItemRes getReviewLikeList(Principal principal, int pageNo) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+
+        Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
+
+        Page<Review> reviewsPage = likeRepository.findLikedReviewsByUserOrderByCreatedAtDesc(user, pageable);
+        List<Review> reviews = reviewsPage.getContent();
+        int lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
+
+        return ReviewItemRes.builder()
+                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
+                            Collectors.toList()))
+                    .pageNo(pageNo)
+                    .lastPageNo(lastPageNo)
+                    .build();
+
+    }
+
+    public ReviewItemRes getReviewWriteList(Principal principal, int pageNo) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+
+        Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
+
+        Page<Review> reviewsPage = reviewRepository.findAllByUserOrderByCreatedAtDesc(user, pageable);
+        List<Review> reviews = reviewsPage.getContent();
+        int lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
+
+        return ReviewItemRes.builder()
+                .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
+                        Collectors.toList()))
+                .pageNo(pageNo)
+                .lastPageNo(lastPageNo)
+                .build();
+
     }
 }

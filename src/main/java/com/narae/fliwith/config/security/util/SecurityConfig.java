@@ -36,6 +36,7 @@ public class SecurityConfig {
                         authorize -> authorize
                                 .requestMatchers("/user/**").permitAll()
                                 .requestMatchers("/admin/**").permitAll()
+                                .requestMatchers("/user/profile").authenticated()
                                 .anyRequest().authenticated()
 
                 )

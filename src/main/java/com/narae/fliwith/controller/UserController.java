@@ -2,11 +2,14 @@ package com.narae.fliwith.controller;
 
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.dto.UserReq.*;
+import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.dto.base.BaseRes;
 import com.narae.fliwith.service.UserService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +42,11 @@ public class UserController {
     public ResponseEntity<BaseRes<Void>> nicknameCheck(@RequestBody NicknameReq nicknameReq) {
         userService.nicknameCheck(nicknameReq);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "사용할 수 있는 닉네임입니다."));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<BaseRes<ProfileRes>> getProfile(Principal principal){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "프로필 조회에 성공했습니다.", userService.getProfile(principal)));
     }
 
 
