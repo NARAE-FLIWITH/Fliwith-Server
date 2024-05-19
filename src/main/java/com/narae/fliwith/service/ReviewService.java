@@ -30,7 +30,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,8 +42,8 @@ public class ReviewService {
     private final LikeRepository likeRepository;
 
 
-    public void writeReview(Principal principal, ReviewReq.WriteReviewReq req) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public void writeReview(String email, ReviewReq.WriteReviewReq req) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
         Spot spot = spotRepository.findById(req.getContentId()).orElseThrow(SpotFindFailException::new);
         Review review = Review.builder().likes(new ArrayList<>()).content(req.getContent()).user(user).spot(spot).images(new ArrayList<>()).build();
         for(String url : req.getImages()){
@@ -54,8 +53,8 @@ public class ReviewService {
         reviewRepository.save(review);
     }
 
-    public ReviewRes.ReviewDetailRes getReviewDetail(Principal principal, Long reviewId) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ReviewRes.ReviewDetailRes getReviewDetail(String email, Long reviewId) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -73,8 +72,8 @@ public class ReviewService {
                 .build();
     }
 
-    public void deleteReview(Principal principal, Long reviewId) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public void deleteReview(String email, Long reviewId) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -87,9 +86,9 @@ public class ReviewService {
 
     }
 
-    public ReviewRes.ReviewDetailRes updateReview(Principal principal, Long reviewId, ReviewReq.WriteReviewReq req) {
+    public ReviewRes.ReviewDetailRes updateReview(String email, Long reviewId, ReviewReq.WriteReviewReq req) {
 
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -120,8 +119,8 @@ public class ReviewService {
     }
 
 
-    public ReviewItemRes getReviewList(Principal principal, int pageNo, String order) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ReviewItemRes getReviewList(String email, int pageNo, String order) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 
@@ -160,8 +159,8 @@ public class ReviewService {
         throw new ReviewListException();
     }
 
-    public List<TourName> getSpotName(Principal principal, String spotName) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public List<TourName> getSpotName(String email, String spotName) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         List<Spot> spots = spotRepository.findAllByTitleContains(spotName);
 
@@ -171,8 +170,8 @@ public class ReviewService {
 
     }
 
-    public LikeUnlikeRes likeUnlikeReview(Principal principal, Long reviewId) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public LikeUnlikeRes likeUnlikeReview(String email, Long reviewId) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
         AtomicBoolean like = new AtomicBoolean(true);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
@@ -189,8 +188,8 @@ public class ReviewService {
     }
 
 
-    public ReviewItemRes getReviewLikeList(Principal principal, int pageNo) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ReviewItemRes getReviewLikeList(String email, int pageNo) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 
@@ -207,8 +206,8 @@ public class ReviewService {
 
     }
 
-    public ReviewItemRes getReviewWriteList(Principal principal, int pageNo) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ReviewItemRes getReviewWriteList(String email, int pageNo) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 

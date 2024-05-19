@@ -12,7 +12,6 @@ import com.narae.fliwith.dto.ImageRes.PresignedUrlRes;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.security.Principal;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +36,8 @@ public class S3Service {
     private final UserRepository userRepository;
 
 
-    public ImageRes.PresignedUrlRes issuePresignedUrl(Principal principal, PresignedUrlReq presignedUrlReq){
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ImageRes.PresignedUrlRes issuePresignedUrl(String email, PresignedUrlReq presignedUrlReq){
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
 
         String imageName = folder+UUID.randomUUID()+"."+presignedUrlReq.getImageExtension().getUploadExtension();
 

@@ -1,5 +1,6 @@
 package com.narae.fliwith.config.security.util;
 
+import com.narae.fliwith.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final TokenUtil tokenUtil;
+    private final UserRepository userRepository;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -40,7 +42,7 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
 
                 )
-                .addFilterBefore(new JwtFilter(tokenUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(tokenUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();

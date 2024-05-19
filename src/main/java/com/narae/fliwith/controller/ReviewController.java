@@ -1,5 +1,6 @@
 package com.narae.fliwith.controller;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.dto.ImageReq.PresignedUrlReq;
 import com.narae.fliwith.dto.ImageRes;
 import com.narae.fliwith.dto.ReviewReq;
@@ -13,9 +14,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,54 +25,54 @@ public class ReviewController {
     private final S3Service s3Service;
 
     @PostMapping()
-    public ResponseEntity<BaseRes<Void>> createReview(Principal principal, @RequestBody ReviewReq.WriteReviewReq writeReviewReq) {
-        reviewService.writeReview(principal, writeReviewReq);
+    public ResponseEntity<BaseRes<Void>> createReview(@AuthenticationPrincipal CustomUser customUser, @RequestBody ReviewReq.WriteReviewReq writeReviewReq) {
+        reviewService.writeReview(customUser.getEmail(), writeReviewReq);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰를 작성하는데 성공했습니다."));
     }
     @GetMapping("/{reviewId}")
-    public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> getReview(Principal principal, @PathVariable Long reviewId) {
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 상세조회에 성공했습니다.", reviewService.getReviewDetail(principal, reviewId)));
+    public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> getReview(@AuthenticationPrincipal CustomUser customUser, @PathVariable Long reviewId) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 상세조회에 성공했습니다.", reviewService.getReviewDetail(customUser.getEmail(), reviewId)));
     }
 
     @DeleteMapping("/{reviewId}")
-    public ResponseEntity<BaseRes<Void>> deleteReview(Principal principal, @PathVariable Long reviewId) {
-        reviewService.deleteReview(principal, reviewId);
+    public ResponseEntity<BaseRes<Void>> deleteReview(@AuthenticationPrincipal CustomUser customUser, @PathVariable Long reviewId) {
+        reviewService.deleteReview(customUser.getEmail(), reviewId);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 삭제에 성공했습니다."));
     }
 
     @PatchMapping("/{reviewId}")
-    public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> updateReview(Principal principal, @PathVariable Long reviewId, @RequestBody ReviewReq.WriteReviewReq writeReviewReq) {
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 수정에 성공했습니다.", reviewService.updateReview(principal, reviewId, writeReviewReq)));
+    public ResponseEntity<BaseRes<ReviewRes.ReviewDetailRes>> updateReview(@AuthenticationPrincipal CustomUser customUser, @PathVariable Long reviewId, @RequestBody ReviewReq.WriteReviewReq writeReviewReq) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 수정에 성공했습니다.", reviewService.updateReview(customUser.getEmail(), reviewId, writeReviewReq)));
     }
 
     @GetMapping()
-    public ResponseEntity<BaseRes<List<TourName>>> getSpotName(Principal principal, @RequestParam String spotName) {
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 이름 목록 조회에 성공했습니다.", reviewService.getSpotName(principal, spotName)));
+    public ResponseEntity<BaseRes<List<TourName>>> getSpotName(@AuthenticationPrincipal CustomUser customUser, @RequestParam String spotName) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 이름 목록 조회에 성공했습니다.", reviewService.getSpotName(customUser.getEmail(), spotName)));
     }
 
     @GetMapping("/list")
-    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewList(Principal principal, @RequestParam int pageNo, @RequestParam String order){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 목록 조회에 성공했습니다.", reviewService.getReviewList(principal, pageNo, order)));
+    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewList(@AuthenticationPrincipal CustomUser customUser, @RequestParam int pageNo, @RequestParam String order){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 목록 조회에 성공했습니다.", reviewService.getReviewList(customUser.getEmail(), pageNo, order)));
     }
 
     @PostMapping("/presigned")
-    public ResponseEntity<BaseRes<ImageRes.PresignedUrlRes>> updateReview(Principal principal, @RequestBody PresignedUrlReq presignedUrlReq) {
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "presignedUrl 생성에 성공했습니다.", s3Service.issuePresignedUrl(principal, presignedUrlReq)));
+    public ResponseEntity<BaseRes<ImageRes.PresignedUrlRes>> updateReview(@AuthenticationPrincipal CustomUser customUser, @RequestBody PresignedUrlReq presignedUrlReq) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "presignedUrl 생성에 성공했습니다.", s3Service.issuePresignedUrl(customUser.getEmail(), presignedUrlReq)));
     }
 
     @PostMapping("/{reviewId}")
-    public ResponseEntity<BaseRes<ReviewRes.LikeUnlikeRes>> likeUnlikeReview(Principal principal, @PathVariable Long reviewId) {
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 좋아요 또는 좋아요 취소 누르기에 성공했습니다.", reviewService.likeUnlikeReview(principal, reviewId)));
+    public ResponseEntity<BaseRes<ReviewRes.LikeUnlikeRes>> likeUnlikeReview(@AuthenticationPrincipal CustomUser customUser, @PathVariable Long reviewId) {
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 좋아요 또는 좋아요 취소 누르기에 성공했습니다.", reviewService.likeUnlikeReview(customUser.getEmail(), reviewId)));
     }
 
     @GetMapping("/list/like")
-    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewLikeList(Principal principal, @RequestParam int pageNo){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 좋아요 한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewLikeList(principal, pageNo)));
+    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewLikeList(@AuthenticationPrincipal CustomUser customUser, @RequestParam int pageNo){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 좋아요 한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewLikeList(customUser.getEmail(), pageNo)));
     }
 
     @GetMapping("/list/write")
-    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewWriteList(Principal principal, @RequestParam int pageNo){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 작성한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewWriteList(principal, pageNo)));
+    public ResponseEntity<BaseRes<ReviewItemRes>> getReviewWriteList(@AuthenticationPrincipal CustomUser customUser, @RequestParam int pageNo){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 작성한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewWriteList(customUser.getEmail(), pageNo)));
     }
 
 

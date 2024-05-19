@@ -1,23 +1,25 @@
 package com.narae.fliwith.service;
 
+import com.narae.fliwith.config.security.dto.ReissueTokenRes;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.config.security.util.TokenUtil;
 import com.narae.fliwith.domain.Role;
+import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
 import com.narae.fliwith.dto.UserReq.EmailReq;
 import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
+import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
 import com.narae.fliwith.exception.user.LogInFailException;
+import com.narae.fliwith.repository.TokenRepository;
 import com.narae.fliwith.repository.UserRepository;
+import jakarta.servlet.ServletRequest;
 import jakarta.transaction.Transactional;
-import java.security.Principal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,7 @@ public class UserService {
     private final TokenUtil tokenUtil;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
+    private final TokenRepository tokenRepository;
 
     public void signUp(UserReq.SignUpReq signUpReq) {
         if(userRepository.existsByEmail(signUpReq.getEmail())){
@@ -53,26 +56,24 @@ public class UserService {
         User user = userRepository.findByEmail(logInReq.getEmail()).orElseThrow(LogInFailException::new);
 
         if(passwordEncoder.matches(logInReq.getPassword(), user.getPw())){
-            return token(logInReq);
+            tokenUtil.makeAuthentication(user);
+            TokenRes tokenRes = tokenUtil.token(user);
+
+            Token token = Token.builder()
+                    .user(user)
+                    .refreshToken(tokenRes.getRefreshToken())
+                    .build();
+            tokenRepository.findByUser(user).ifPresent(t->tokenRepository.delete(t));
+            tokenRepository.save(token);
+            return tokenRes;
         } else{
             throw new LogInFailException();
         }
 
     }
+    //TODO: 로그아웃시 tokenRepository delete
 
-    private TokenRes token(UserReq.LogInReq user){
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
 
-        // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
-        //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
-        // 3. 인증 정보를 기반으로 JWT 토큰 생성
-        TokenRes tokenRes = tokenUtil.generateTokenRes(authentication);
-
-        // 5. 토큰 발급
-        return tokenRes;
-    }
 
     public void emailCheck(EmailReq emailReq) {
         if(userRepository.existsByEmail(emailReq.getEmail())){
@@ -88,11 +89,27 @@ public class UserService {
 
     }
 
-    public ProfileRes getProfile(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow(LogInFailException::new);
+    public ProfileRes getProfile(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
         return ProfileRes.builder()
                 .disability(user.getDisability())
                 .nickname(user.getNickname())
                 .build();
     }
+
+    public ReissueTokenRes reissue(String token, ServletRequest request) {
+        // refresh 토큰이 유효한지 확인
+        if (token != null && tokenUtil.validateToken(token, request)) {
+
+            // 토큰 새로 받아오기
+            TokenRes newToken = tokenUtil.reissue(token);
+
+            return ReissueTokenRes.from(newToken);
+        }
+        throw new InvalidTokenException();
+    }
+
+
+
+
 }
