@@ -5,6 +5,7 @@ import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
+import com.narae.fliwith.exception.security.ExpiredTokenException;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.NotFoundUserException;
 import com.narae.fliwith.repository.TokenRepository;
@@ -118,6 +119,7 @@ public class TokenUtil implements InitializingBean {
         } catch (ExpiredJwtException e) {
             request.setAttribute("exception", "S0004");
             System.out.println("4044");
+            throw new ExpiredTokenException();
 
         } catch (UnsupportedJwtException e) {
             request.setAttribute("exception", "4045");
