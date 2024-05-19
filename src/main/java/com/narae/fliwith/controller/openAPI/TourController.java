@@ -21,19 +21,19 @@ public class TourController {
     private final TourService tourService;
     @GetMapping("/tour")
     public ResponseEntity<BaseRes<List<TourType>>> getTourByType(@RequestParam String latitude, @RequestParam String longitude, @RequestParam String contentTypeId){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 리스트를 조회하는데 성공했습니다.", tourService.getTourByType(latitude, longitude, contentTypeId)));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 목록 조회에 성공했습니다.", tourService.getTourByType(latitude, longitude, contentTypeId)));
     }
 
     @GetMapping("/tour/{contentTypeId}/{contentId}")
     public ResponseEntity<BaseRes<TourDetailRes>> getTour(@PathVariable(value = "contentTypeId")String contentTypeId, @PathVariable(value = "contentId") String contentId){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 리스트를 조회하는데 성공했습니다.", tourService.getTour(contentTypeId, contentId)));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 상세 조회에 성공했습니다.", tourService.getTour(contentTypeId, contentId)));
 
     }
 
     @GetMapping("/admin/save")
     public ResponseEntity<BaseRes<Void>> saveTour(@RequestParam String contentTypeId){
         tourService.saveAllSpots(contentTypeId);
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 타입 리스트를 저장하는데 성공했습니다."));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 타입 목록을 저장하는데 성공했습니다."));
     }
 
 }
