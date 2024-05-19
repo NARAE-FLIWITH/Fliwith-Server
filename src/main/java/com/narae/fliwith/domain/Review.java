@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -37,8 +36,8 @@ public class Review {
     private String content;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "review", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
-    @ColumnDefault("0")
-    private Long likes;
+    @OneToMany(mappedBy = "review")
+    private List<Like> likes = new ArrayList<>();
     @CreatedDate
     @Column(updatable = false)
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -63,16 +62,5 @@ public class Review {
             images.add(Image.builder().url(url).review(this).build());
         }
 
-    }
-
-    public void unlike() {
-        likes--;
-        if(likes<0){
-            likes = 0L;
-        }
-    }
-
-    public void like() {
-        likes++;
     }
 }
