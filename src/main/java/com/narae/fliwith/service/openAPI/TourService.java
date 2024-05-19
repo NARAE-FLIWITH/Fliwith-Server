@@ -1,13 +1,15 @@
 package com.narae.fliwith.service.openAPI;
 
 import com.narae.fliwith.domain.Location;
+import com.narae.fliwith.domain.Review;
 import com.narae.fliwith.domain.Spot;
-import com.narae.fliwith.dto.TourRes;
+import com.narae.fliwith.dto.ReviewRes.ReviewItem;
 import com.narae.fliwith.dto.TourRes.TourDetailRes;
 import com.narae.fliwith.dto.TourRes.TourType;
 import com.narae.fliwith.dto.openAPI.*;
-import com.narae.fliwith.dto.openAPI.DetailWithTourRes.Item;
+import com.narae.fliwith.exception.spot.SpotFindFailException;
 import com.narae.fliwith.repository.LocationRepository;
+import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -17,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -32,8 +37,9 @@ public class TourService {
 
     private final SpotRepository spotRepository;
     private final LocationRepository locationRepository;
+    private final ReviewRepository reviewRepository;
 
-    public Mono<Item> getDetailWithTour(String contentId) {
+    public Mono<DetailWithTourRes.Item> getDetailWithTour(String contentId) {
         return webClient.get()
                 .uri(uriBuilder ->
                     uriBuilder.path("/detailWithTour1")
@@ -47,7 +53,8 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailWithTourRes.Root>() {
                 })
-                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0))
+                .onErrorReturn(DecodingException.class, new DetailWithTourRes.Item());
 
     }
 
@@ -69,7 +76,8 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailCommonRes.Root>() {
                 })
-                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0))
+                .onErrorReturn(DecodingException.class, new DetailCommonRes.Item());
     }
 
     public Mono<DetailIntroRes.Item> getDetailIntro(String contentId, String contentTypeId) {
@@ -87,7 +95,8 @@ public class TourService {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<DetailIntroRes.Root>() {
                 })
-                .map(root -> root.getResponse().getBody().getItems().getItem().get(0));
+                .map(root -> root.getResponse().getBody().getItems().getItem().get(0))
+                .onErrorReturn(DecodingException.class, new DetailIntroRes.Item());
     }
 
     public List<TourType> getTourByType(String latitude, String longitude, String contentTypeId) {
@@ -121,10 +130,18 @@ public class TourService {
         DetailIntroRes.Item detailIntro = getDetailIntro(contentId, contentTypeId).block();
         DetailCommonRes.Item detailCommon = getDetailCommon(contentId).block();
 
+        Pageable pageable = PageRequest.of(0, 10); // 0은 페이지 번호, 10은 페이지 크기
+        Spot spot = spotRepository.findById(Integer.parseInt(contentId)).orElseThrow(SpotFindFailException::new);
+
+        Page<Review> reviewsPage = reviewRepository.findAllBySpotOrderByCreatedAtDesc(spot, pageable);
+        List<Review> reviews = reviewsPage.getContent();
+
         return TourDetailRes.builder()
                 .detailWithTour(detailWithTour)
                 .detailIntro(detailIntro)
                 .detailCommon(detailCommon)
+                .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
+                        Collectors.toList()))
                 .build();
     }
 

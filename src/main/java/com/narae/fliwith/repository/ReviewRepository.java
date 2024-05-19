@@ -1,6 +1,7 @@
 package com.narae.fliwith.repository;
 
 import com.narae.fliwith.domain.Review;
+import com.narae.fliwith.domain.Spot;
 import com.narae.fliwith.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Page<Review> findAllByOrderByLikesDescCreatedAtDesc(Pageable pageable);
 
     Page<Review> findAllByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+
+    Page<Review> findAllBySpotOrderByCreatedAtDesc(Spot spot, Pageable pageable);
 
 
 }

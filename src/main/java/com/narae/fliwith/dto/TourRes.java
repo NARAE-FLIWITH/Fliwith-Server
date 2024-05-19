@@ -1,5 +1,6 @@
 package com.narae.fliwith.dto;
 
+import com.narae.fliwith.dto.ReviewRes.ReviewItem;
 import com.narae.fliwith.dto.openAPI.DetailCommonRes;
 import com.narae.fliwith.dto.openAPI.DetailIntroRes;
 import com.narae.fliwith.dto.openAPI.DetailWithTourRes;
@@ -37,6 +38,7 @@ public class TourRes {
         DetailWithTourRes.Item detailWithTour;
         DetailIntroRes.Item detailIntro;
         DetailCommonRes.Item detailCommon;
+        List<ReviewItem> reviews;
 
     }
 
