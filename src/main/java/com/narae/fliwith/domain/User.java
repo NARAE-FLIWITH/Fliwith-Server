@@ -23,6 +23,13 @@ public class User {
     private Disability disability;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Enumerated(EnumType.STRING)
+    private SignupStatus signupStatus;
+    private String auth;
     //TODO: 탈퇴상태 추가
+
+    public void completeSignup(){
+        signupStatus = SignupStatus.COMPLETE;
+    }
 
 }

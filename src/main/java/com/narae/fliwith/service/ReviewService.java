@@ -37,13 +37,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
     private final SpotRepository spotRepository;
     private final LikeRepository likeRepository;
+    private final AuthService authService;
 
 
     public void writeReview(String email, ReviewReq.WriteReviewReq req) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
         Spot spot = spotRepository.findById(req.getContentId()).orElseThrow(SpotFindFailException::new);
         Review review = Review.builder().likes(new ArrayList<>()).content(req.getContent()).user(user).spot(spot).images(new ArrayList<>()).build();
         for(String url : req.getImages()){
@@ -54,7 +54,7 @@ public class ReviewService {
     }
 
     public ReviewRes.ReviewDetailRes getReviewDetail(String email, Long reviewId) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -73,7 +73,7 @@ public class ReviewService {
     }
 
     public void deleteReview(String email, Long reviewId) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -88,7 +88,7 @@ public class ReviewService {
 
     public ReviewRes.ReviewDetailRes updateReview(String email, Long reviewId, ReviewReq.WriteReviewReq req) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
 
@@ -120,7 +120,7 @@ public class ReviewService {
 
 
     public ReviewItemRes getReviewList(String email, int pageNo, String order) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 
@@ -160,7 +160,7 @@ public class ReviewService {
     }
 
     public List<TourName> getSpotName(String email, String spotName) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         List<Spot> spots = spotRepository.findAllByTitleContains(spotName);
 
@@ -171,7 +171,7 @@ public class ReviewService {
     }
 
     public LikeUnlikeRes likeUnlikeReview(String email, Long reviewId) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
         AtomicBoolean like = new AtomicBoolean(true);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
@@ -189,7 +189,7 @@ public class ReviewService {
 
 
     public ReviewItemRes getReviewLikeList(String email, int pageNo) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 
@@ -207,7 +207,7 @@ public class ReviewService {
     }
 
     public ReviewItemRes getReviewWriteList(String email, int pageNo) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // 0은 페이지 번호, 10은 페이지 크기
 

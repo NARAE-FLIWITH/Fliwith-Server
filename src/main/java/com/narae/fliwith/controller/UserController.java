@@ -6,6 +6,7 @@ import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.dto.UserReq.*;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.dto.base.BaseRes;
+import com.narae.fliwith.service.MailService;
 import com.narae.fliwith.service.UserService;
 import jakarta.servlet.ServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+
 
     @PostMapping("/signup/email")
     public ResponseEntity<BaseRes<Void>> signUp(@RequestBody SignUpReq signUpReq){
@@ -64,5 +67,10 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "로그아웃에 성공했습니다."));
     }
 
+    @GetMapping("/authemail")
+    public ResponseEntity<BaseRes<Void>> authEmail(@RequestParam String auth) {
+        userService.updateSignupStatus(auth);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "이메일 인증에 성공했습니다."));
+    }
 
 }

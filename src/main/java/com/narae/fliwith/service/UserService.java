@@ -1,9 +1,9 @@
 package com.narae.fliwith.service;
 
-import com.narae.fliwith.config.security.dto.ReissueTokenRes;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.config.security.util.TokenUtil;
 import com.narae.fliwith.domain.Role;
+import com.narae.fliwith.domain.SignupStatus;
 import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
@@ -14,13 +14,14 @@ import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.AlreadyLogoutException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
+import com.narae.fliwith.exception.user.EmailAuthException;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.TokenRepository;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.servlet.ServletRequest;
 import jakarta.transaction.Transactional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +31,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final TokenUtil tokenUtil;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final MailService mailService;
+    private final AuthService authService;
 
     public void signUp(UserReq.SignUpReq signUpReq) {
         if(userRepository.existsByEmail(signUpReq.getEmail())){
@@ -47,14 +49,17 @@ public class UserService {
                 .role(Role.ROLE_USER)
                 .nickname(signUpReq.getNickname())
                 .disability(signUpReq.getDisability())
+                .signupStatus(SignupStatus.ING)
+                .auth(UUID.randomUUID().toString())
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
+        mailService.sendMail(user);
 
     }
 
     public TokenRes logIn(UserReq.LogInReq logInReq) {
-        User user = userRepository.findByEmail(logInReq.getEmail()).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(logInReq.getEmail());
 
         if(passwordEncoder.matches(logInReq.getPassword(), user.getPw())){
             tokenUtil.makeAuthentication(user);
@@ -88,7 +93,8 @@ public class UserService {
     }
 
     public ProfileRes getProfile(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
+
         return ProfileRes.builder()
                 .disability(user.getDisability())
                 .nickname(user.getNickname())
@@ -106,7 +112,13 @@ public class UserService {
     }
 
     public void logout(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
         tokenRepository.findByUser(user).ifPresentOrElse(tokenRepository::delete, AlreadyLogoutException::new);
     }
+
+    public void updateSignupStatus(String auth){
+        User user = userRepository.findByAuth(auth).orElseThrow(EmailAuthException::new);
+        user.completeSignup();
+    }
+
 }
