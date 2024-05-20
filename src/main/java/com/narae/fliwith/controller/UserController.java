@@ -58,5 +58,11 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "토큰 재발급에 성공했습니다.", userService.reissue(token, request)));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<BaseRes<Void>> logout(@AuthenticationPrincipal CustomUser customUser) {
+        userService.logout(customUser.getEmail());
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "로그아웃에 성공했습니다."));
+    }
+
 
 }

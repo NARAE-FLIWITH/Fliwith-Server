@@ -11,6 +11,7 @@ import com.narae.fliwith.dto.UserReq.EmailReq;
 import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.security.InvalidTokenException;
+import com.narae.fliwith.exception.user.AlreadyLogoutException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
 import com.narae.fliwith.exception.user.LogInFailException;
@@ -71,9 +72,6 @@ public class UserService {
         }
 
     }
-    //TODO: 로그아웃시 tokenRepository delete
-
-
 
     public void emailCheck(EmailReq emailReq) {
         if(userRepository.existsByEmail(emailReq.getEmail())){
@@ -107,7 +105,8 @@ public class UserService {
         throw new InvalidTokenException();
     }
 
-
-
-
+    public void logout(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        tokenRepository.findByUser(user).ifPresentOrElse(tokenRepository::delete, AlreadyLogoutException::new);
+    }
 }
