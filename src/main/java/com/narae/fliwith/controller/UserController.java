@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/reissue")
-    public ResponseEntity<BaseRes<ReissueTokenRes>> reissue(@RequestHeader(value = "RefreshToken") String token, ServletRequest request){
+    public ResponseEntity<BaseRes<TokenRes>> reissue(@RequestHeader(value = "RefreshToken") String token, ServletRequest request){
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "토큰 재발급에 성공했습니다.", userService.reissue(token, request)));
     }
 
