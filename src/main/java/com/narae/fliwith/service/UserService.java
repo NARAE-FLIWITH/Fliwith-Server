@@ -97,14 +97,12 @@ public class UserService {
                 .build();
     }
 
-    public ReissueTokenRes reissue(String token, ServletRequest request) {
+    public TokenRes reissue(String token, ServletRequest request) {
         // refresh 토큰이 유효한지 확인
         if (token != null && tokenUtil.validateToken(token, request)) {
 
             // 토큰 새로 받아오기
-            TokenRes newToken = tokenUtil.reissue(token);
-
-            return ReissueTokenRes.from(newToken);
+            return tokenUtil.reissue(token);
         }
         throw new InvalidTokenException();
     }
