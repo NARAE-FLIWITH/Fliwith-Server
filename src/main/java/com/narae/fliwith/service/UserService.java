@@ -113,7 +113,9 @@ public class UserService {
 
     public void logout(String email) {
         User user = authService.authUser(email);
-        tokenRepository.findByUser(user).ifPresentOrElse(tokenRepository::delete, AlreadyLogoutException::new);
+        Token token = tokenRepository.findByUser(user).orElseThrow(AlreadyLogoutException::new);
+        tokenRepository.delete(token);
+
     }
 
     public void updateSignupStatus(String auth){
