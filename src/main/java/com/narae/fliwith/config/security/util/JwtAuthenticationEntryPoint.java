@@ -17,12 +17,22 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         String exception = String.valueOf(request.getAttribute("exception"));
-        //TODO: 조건별 예외 처리
-        if("S0004".equals(exception)){
+        if(exception.equals(SecurityExceptionList.UNKNOWN_ERROR.getErrorCode()))
+            setResponse(response, SecurityExceptionList.UNKNOWN_ERROR);
+
+        else if(exception.equals(SecurityExceptionList.MALFORMED_TOKEN_ERROR.getErrorCode()))
+            setResponse(response, SecurityExceptionList.MALFORMED_TOKEN_ERROR);
+
+        else if(exception.equals(SecurityExceptionList.ILLEGAL_TOKEN_ERROR.getErrorCode()))
+            setResponse(response, SecurityExceptionList.ILLEGAL_TOKEN_ERROR);
+
+        else if(exception.equals(SecurityExceptionList.EXPIRED_TOKEN_ERROR.getErrorCode()))
             setResponse(response, SecurityExceptionList.EXPIRED_TOKEN_ERROR);
-        } else{
-            setResponse(response, SecurityExceptionList.ACCESS_DENIED);
-        }
+
+        else if(exception.equals(SecurityExceptionList.UNSUPPORTED_TOKEN_ERROR.getErrorCode()))
+            setResponse(response, SecurityExceptionList.UNSUPPORTED_TOKEN_ERROR);
+
+        else setResponse(response, SecurityExceptionList.ACCESS_DENIED);
 
     }
 

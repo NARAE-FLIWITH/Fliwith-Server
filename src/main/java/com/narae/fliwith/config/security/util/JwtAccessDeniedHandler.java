@@ -4,6 +4,7 @@ import com.narae.fliwith.exception.security.constants.SecurityExceptionList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -22,7 +23,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
     private void setResponse(HttpServletResponse response, SecurityExceptionList exceptionCode) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(HttpStatus.SC_FORBIDDEN);
 
         JSONObject responseJson = new JSONObject();
         responseJson.put("timestamp", LocalDateTime.now().withNano(0).toString());

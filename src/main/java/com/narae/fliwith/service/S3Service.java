@@ -33,11 +33,11 @@ public class S3Service {
     @Value("${image.folder}")
     private String folder;
 
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
 
     public ImageRes.PresignedUrlRes issuePresignedUrl(String email, PresignedUrlReq presignedUrlReq){
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         String imageName = folder+UUID.randomUUID()+"."+presignedUrlReq.getImageExtension().getUploadExtension();
 

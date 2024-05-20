@@ -14,11 +14,10 @@ import com.narae.fliwith.dto.TourRes.TourType;
 import com.narae.fliwith.dto.openAPI.*;
 import com.narae.fliwith.exception.spot.SpotFindFailException;
 import com.narae.fliwith.exception.tour.NotFoundAiTourException;
-import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.repository.LocationRepository;
 import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
-import com.narae.fliwith.repository.UserRepository;
+import com.narae.fliwith.service.AuthService;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
@@ -58,7 +57,7 @@ public class TourService {
     private final SpotRepository spotRepository;
     private final LocationRepository locationRepository;
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
     public Mono<DetailWithTourRes.Item> getDetailWithTour(String contentId) {
         return webClient.get()
@@ -120,7 +119,8 @@ public class TourService {
                 .onErrorReturn(DecodingException.class, new DetailIntroRes.Item());
     }
 
-    public List<TourType> getTourByType(String latitude, String longitude, String contentTypeId) {
+    public List<TourType> getTourByType(String email, String latitude, String longitude, String contentTypeId) {
+        User user = authService.authUser(email);
         return webClient.get()
                 .uri(uriBuilder ->
                         uriBuilder.path("/locationBasedList1")
@@ -146,7 +146,9 @@ public class TourService {
 
     }
 
-    public TourDetailRes getTour(String contentTypeId, String contentId) {
+    public TourDetailRes getTour(String email, String contentTypeId, String contentId) {
+        User user = authService.authUser(email);
+
         DetailWithTourRes.Item detailWithTour = getDetailWithTour(contentId).block();
         DetailIntroRes.Item detailIntro = getDetailIntro(contentId, contentTypeId).block();
         DetailCommonRes.Item detailCommon = getDetailCommon(contentId).block();
@@ -243,7 +245,7 @@ public class TourService {
     }
 
     public TourDetailRes getAiTour(String email, AiTourReq aiTourReq) {
-        User user = userRepository.findByEmail(email).orElseThrow(LogInFailException::new);
+        User user = authService.authUser(email);
 
         AiTourParams params = AiTourParams.from(aiTourReq);
         List<TourAsk> askList = new ArrayList<>();
@@ -294,7 +296,8 @@ public class TourService {
             String gptRecommend = createGptRecommend(sb.toString(), params);
 //            System.out.println(gptAnswer);
             TourAsk gptChoice = askList.stream().filter(tourAsk -> gptRecommend.contains(tourAsk.getName())).findFirst().get();
-            return getTour(gptChoice.getContentTypeId(), gptChoice.getContentId());
+            //TODO: auth 중복 로직 해결
+            return getTour(email, gptChoice.getContentTypeId(), gptChoice.getContentId());
         }
 
 

@@ -1,11 +1,16 @@
 package com.narae.fliwith.config.security.util;
 
 
+import static com.narae.fliwith.exception.security.constants.SecurityExceptionList.ACCESS_DENIED;
+import static com.narae.fliwith.exception.security.constants.SecurityExceptionList.EXPIRED_TOKEN_ERROR;
+import static com.narae.fliwith.exception.security.constants.SecurityExceptionList.ILLEGAL_TOKEN_ERROR;
+import static com.narae.fliwith.exception.security.constants.SecurityExceptionList.MALFORMED_TOKEN_ERROR;
+import static com.narae.fliwith.exception.security.constants.SecurityExceptionList.UNSUPPORTED_TOKEN_ERROR;
+
 import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
-import com.narae.fliwith.exception.security.ExpiredTokenException;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.NotFoundUserException;
 import com.narae.fliwith.repository.TokenRepository;
@@ -15,6 +20,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletRequest;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +36,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class TokenUtil implements InitializingBean {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
@@ -114,44 +121,50 @@ public class TokenUtil implements InitializingBean {
             Jws<Claims> claims =Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
             return claims.getBody().getExpiration().after(new Date());
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            request.setAttribute("exception", "4043");
-            System.out.println("4043");
+            log.info("잘못된 JWT 서명입니다.");
+            request.setAttribute("exception", MALFORMED_TOKEN_ERROR.getErrorCode());
+
         } catch (ExpiredJwtException e) {
-            request.setAttribute("exception", "S0004");
-            System.out.println("4044");
-            throw new ExpiredTokenException();
+            log.info("만료된 JWT 토큰입니다.");
+            request.setAttribute("exception", EXPIRED_TOKEN_ERROR.getErrorCode());
 
         } catch (UnsupportedJwtException e) {
-            request.setAttribute("exception", "4045");
-            System.out.println("4045");
+            log.info("지원되지 않는 JWT 토큰입니다.");
+            request.setAttribute("exception", UNSUPPORTED_TOKEN_ERROR.getErrorCode());
 
         } catch (IllegalArgumentException e) {
-            request.setAttribute("exception", "4046");
-            System.out.println("4046");
+            log.info("JWT 토큰이 잘못되었습니다.");
+            request.setAttribute("exception", ILLEGAL_TOKEN_ERROR.getErrorCode());
+
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            request.setAttribute("exception", ACCESS_DENIED.getErrorCode());
 
         }
         return false;
     }
 
     public TokenRes reissue(String token){
-        //token = refreshToken
-
-        //accessToken으로 user를 찾고
+        //사용자가 보낸 refreshToken으로 user를 찾고
         String userEmail = getSubject(token);
         User user = userRepository.findByEmail(userEmail).orElseThrow(NotFoundUserException::new);
 
-        //찾은 user로 refreshToken을 가져오고
+        //찾은 user로 저장되어있는 refreshToken을 가져오고
         Token preToken = tokenRepository.findByUser(user).orElseThrow(InvalidTokenException::new);
 
-        tokenRepository.delete(preToken);
-        TokenRes tokenRes = token(user);
-        Token newToken = Token.builder()
-                .user(user)
-                .refreshToken(tokenRes.getRefreshToken())
-                .build();
-        tokenRepository.save(newToken);
+        if(preToken.getRefreshToken().equals(token)){
+            tokenRepository.delete(preToken);
+            TokenRes tokenRes = token(user);
+            Token newToken = Token.builder()
+                    .user(user)
+                    .refreshToken(tokenRes.getRefreshToken())
+                    .build();
+            tokenRepository.save(newToken);
 
-        return tokenRes;
+            return tokenRes;
+        }
+
+        throw new InvalidTokenException();
 
     }
 
