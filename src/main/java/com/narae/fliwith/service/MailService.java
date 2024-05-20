@@ -22,14 +22,15 @@ public class MailService {
 
     @Value("${spring.mail.username}")
     private String email;
+    @Value("${email.server}")
+    private String server;
 
     private MimeMessage createMessage(User user) throws MessagingException, UnsupportedEncodingException {
-        //TODO: 서버 주소로 바꾸기
         String content = "<div>"
                 + "<h1> 안녕하세요. Fliwith 입니다</h1>"
                 + "<br>"
                 + "<p>아래 링크를 클릭하면 이메일 인증이 완료됩니다.<p>"
-                + "<a href='http://localhost:8080/user/authemail?auth=" + user.getAuth() + "'>인증 링크</a>"
+                + "<a href='"+server + user.getAuth() + "'>인증 링크</a>"
                 + "</div>";
 
 
