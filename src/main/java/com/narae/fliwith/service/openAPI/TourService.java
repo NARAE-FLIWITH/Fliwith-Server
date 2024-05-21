@@ -128,7 +128,7 @@ public class TourService {
                                 .queryParam("MobileApp", "fliwith")
                                 .queryParam("mapX", longitude)
                                 .queryParam("mapY", String.valueOf(latitude))
-                                .queryParam("radius", "500")
+                                .queryParam("radius", "1500")
                                 .queryParam("_type", "json")
                                 .queryParam("contentTypeId", String.valueOf(contentTypeId))
                                 .queryParam("serviceKey", serviceKey)
