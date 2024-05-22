@@ -119,32 +119,15 @@ public class TourService {
                 .onErrorReturn(DecodingException.class, new DetailIntroRes.Item());
     }
 
-    public List<TourType> getTourByType(String email, String latitude, String longitude, String contentTypeId) {
+    public List<TourType> getNearEveryTourType(String email, double latitude, double longitude) {
         User user = authService.authUser(email);
-        return webClient.get()
-                .uri(uriBuilder ->
-                        uriBuilder.path("/locationBasedList1")
-                                .queryParam("MobileOS", "AND")
-                                .queryParam("MobileApp", "fliwith")
-                                .queryParam("mapX", longitude)
-                                .queryParam("mapY", String.valueOf(latitude))
-                                .queryParam("radius", "1500")
-                                .queryParam("_type", "json")
-                                .queryParam("contentTypeId", String.valueOf(contentTypeId))
-                                .queryParam("serviceKey", serviceKey)
-                                .build()
-                )
-                .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<LocationBasedListRes.Root>() {
-                })
-                .map(root -> root.getResponse().getBody().getItems().getItem().stream()
-                        .map(item -> TourType.builder().contentId(Integer.parseInt(item.getContentid())).contentTypeId(Integer.parseInt(item.getContenttypeid())).latitude(
-                                Double.parseDouble(item.getMapy())).longitude(Double.parseDouble(item.getMapx())).build()).collect(
-                                Collectors.toList()))
-                .onErrorReturn(DecodingException.class, new ArrayList<>())
-                .blockFirst();
-        //TODO: DB에 관광지 미리 저장해두고, 조회하는 걸로 로직 변경하기
-
+        return locationRepository.findNearEverySpotType(latitude, longitude).stream()
+                .map(location -> TourType.builder()
+                        .contentTypeId(location.getSpot().getContentTypeId())
+                        .contentId(location.getSpot().getId())
+                        .latitude(location.getLatitude())
+                        .longitude(location.getLongitude()).build())
+                .collect(Collectors.toList());
     }
 
     public TourDetailRes getTour(String email, String contentTypeId, String contentId) {
