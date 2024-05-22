@@ -28,6 +28,8 @@ public class TourRes {
     public static class TourType{
         int contentTypeId;
         int contentId;
+        double latitude;
+        double longitude;
     }
 
     @Getter
