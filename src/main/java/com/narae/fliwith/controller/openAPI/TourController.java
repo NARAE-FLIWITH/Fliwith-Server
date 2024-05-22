@@ -24,10 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class TourController {
 
     private final TourService tourService;
+//    @GetMapping("/tour")
+//    public ResponseEntity<BaseRes<List<TourType>>> getTourByType(@AuthenticationPrincipal CustomUser customUser, @RequestParam String latitude, @RequestParam String longitude, @RequestParam String contentTypeId){
+//        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 목록 조회에 성공했습니다.", tourService.getTourByType(
+//                customUser.getEmail(), latitude, longitude, contentTypeId)));
+//    }
+
     @GetMapping("/tour")
-    public ResponseEntity<BaseRes<List<TourType>>> getTourByType(@AuthenticationPrincipal CustomUser customUser, @RequestParam String latitude, @RequestParam String longitude, @RequestParam String contentTypeId){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 목록 조회에 성공했습니다.", tourService.getTourByType(
-                customUser.getEmail(), latitude, longitude, contentTypeId)));
+    public ResponseEntity<BaseRes<List<TourType>>> getTourByType(@AuthenticationPrincipal CustomUser customUser, @RequestParam double latitude, @RequestParam double longitude){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "위치기반 모든 유형의 관광지 목록 조회에 성공했습니다.", tourService.getNearEveryTourType(
+                customUser.getEmail(), latitude, longitude)));
     }
 
     @GetMapping("/tour/{contentTypeId}/{contentId}")
