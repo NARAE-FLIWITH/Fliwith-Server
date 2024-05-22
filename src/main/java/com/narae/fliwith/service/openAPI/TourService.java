@@ -138,8 +138,9 @@ public class TourService {
                 .bodyToFlux(new ParameterizedTypeReference<LocationBasedListRes.Root>() {
                 })
                 .map(root -> root.getResponse().getBody().getItems().getItem().stream()
-                        .map(item -> new TourType(Integer.parseInt(item.contenttypeid), Integer.parseInt(item.contentid)))
-                        .collect(Collectors.toList()))
+                        .map(item -> TourType.builder().contentId(Integer.parseInt(item.getContentid())).contentTypeId(Integer.parseInt(item.getContenttypeid())).latitude(
+                                Double.parseDouble(item.getMapy())).longitude(Double.parseDouble(item.getMapx())).build()).collect(
+                                Collectors.toList()))
                 .onErrorReturn(DecodingException.class, new ArrayList<>())
                 .blockFirst();
         //TODO: DB에 관광지 미리 저장해두고, 조회하는 걸로 로직 변경하기
