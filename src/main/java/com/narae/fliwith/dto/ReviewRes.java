@@ -20,6 +20,7 @@ public class ReviewRes {
         private String nickname;
         private LocalDateTime createdAt;
         private Long likes;
+        private int contentId;
         private String spotName;
         private String content;
         private List<String> images;

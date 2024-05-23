@@ -63,6 +63,7 @@ public class ReviewService {
         boolean isLike = likeRepository.existsByLikerAndReview(user, review);
 
         return ReviewRes.ReviewDetailRes.builder()
+                .contentId(review.getSpot().getId())
                 .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
                 .disability(review.getUser().getDisability())
@@ -112,6 +113,7 @@ public class ReviewService {
         review.updateReview(updateReviewReq);
 
         return ReviewRes.ReviewDetailRes.builder()
+                .contentId(review.getSpot().getId())
                 .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
                 .disability(review.getUser().getDisability())
