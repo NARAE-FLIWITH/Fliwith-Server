@@ -24,6 +24,7 @@ public class ReviewRes {
         private String content;
         private List<String> images;
         private boolean isMine;
+        private boolean isLike;
 
     }
 

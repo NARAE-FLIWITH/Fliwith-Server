@@ -60,6 +60,8 @@ public class ReviewService {
 
         boolean isMine = user.getId().equals(review.getUser().getId());
 
+        boolean isLike = likeRepository.existsByLikerAndReview(user, review);
+
         return ReviewRes.ReviewDetailRes.builder()
                 .spotName(review.getSpot().getTitle())
                 .content(review.getContent())
@@ -69,6 +71,7 @@ public class ReviewService {
                 .nickname(review.getUser().getNickname())
                 .isMine(isMine)
                 .likes((long) review.getLikes().size())
+                .isLike(isLike)
                 .build();
     }
 
@@ -97,6 +100,8 @@ public class ReviewService {
             throw new ReviewAccessFailException();
         }
 
+        boolean isLike = likeRepository.existsByLikerAndReview(user, review);
+
         ReviewReq.UpdateReviewReq updateReviewReq =
                 ReviewReq.UpdateReviewReq.builder()
                         .content(req.getContent())
@@ -115,6 +120,7 @@ public class ReviewService {
                 .nickname(review.getUser().getNickname())
                 .isMine(isMine)
                 .likes((long) review.getLikes().size())
+                .isLike(isLike)
                 .build();
     }
 

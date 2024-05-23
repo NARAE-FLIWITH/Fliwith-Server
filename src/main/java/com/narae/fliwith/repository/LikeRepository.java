@@ -16,4 +16,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     @Query("SELECT l.review FROM Like l WHERE l.liker = :user ORDER BY l.review.createdAt desc")
     Page<Review> findLikedReviewsByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+
+    boolean existsByLikerAndReview(User liker, Review review);
 }
