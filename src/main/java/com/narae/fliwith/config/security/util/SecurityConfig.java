@@ -36,10 +36,14 @@ public class SecurityConfig {
                 .exceptionHandling(ex->ex.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .requestMatchers("/user/**").permitAll()
+                                .requestMatchers("/user/signup/**").permitAll()
+                                .requestMatchers("/user/login").permitAll()
+                                .requestMatchers("/user/email").permitAll()
+                                .requestMatchers("/user/nickname").permitAll()
+                                .requestMatchers("/user/reissue").permitAll()
+                                .requestMatchers("/user/authemail").permitAll()
+                                .requestMatchers("/user").permitAll()
                                 .requestMatchers("/admin/**").permitAll()
-                                .requestMatchers("/user/profile").authenticated()
-                                .requestMatchers("/user/logout").authenticated()
                                 .anyRequest().authenticated()
 
                 )
