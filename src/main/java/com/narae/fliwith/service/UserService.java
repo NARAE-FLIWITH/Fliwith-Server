@@ -8,14 +8,17 @@ import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.UserReq;
 import com.narae.fliwith.dto.UserReq.EmailReq;
+import com.narae.fliwith.dto.UserReq.NewPasswordReq;
 import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.AlreadyLogoutException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
+import com.narae.fliwith.exception.user.DuplicateUserPasswordException;
 import com.narae.fliwith.exception.user.EmailAuthException;
 import com.narae.fliwith.exception.user.LogInFailException;
+import com.narae.fliwith.exception.user.NonValidUserPasswordException;
 import com.narae.fliwith.repository.TokenRepository;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.servlet.ServletRequest;
@@ -123,4 +126,22 @@ public class UserService {
         user.completeSignup();
     }
 
+    public void temporaryPassword(String email) {
+        User user = authService.authUser(email);
+        mailService.tempoaryPassword(user);
+    }
+
+    public void changePassword(String email, NewPasswordReq newPasswordReq) {
+        User user = authService.authUser(email);
+        if(newPasswordReq.getCurrentPassword().equals(newPasswordReq.getNewPassword())){
+            throw new DuplicateUserPasswordException();
+        }
+
+        if(passwordEncoder.matches(newPasswordReq.getCurrentPassword(), user.getPw())){
+            String encodedPassword = passwordEncoder.encode(newPasswordReq.getNewPassword());
+            user.changePWd(encodedPassword);
+        } else{
+            throw new NonValidUserPasswordException();
+        }
+    }
 }

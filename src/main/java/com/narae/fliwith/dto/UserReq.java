@@ -44,4 +44,14 @@ public class UserReq {
     public static class NicknameReq{
         private String nickname;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class NewPasswordReq{
+        private String email;
+        private String currentPassword;
+        private String newPassword;
+    }
 }

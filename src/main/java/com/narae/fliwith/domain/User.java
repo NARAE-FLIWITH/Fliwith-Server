@@ -32,4 +32,7 @@ public class User {
         signupStatus = SignupStatus.COMPLETE;
     }
 
+    public void changePWd(String encodedPw) {
+        pw = encodedPw;
+    }
 }

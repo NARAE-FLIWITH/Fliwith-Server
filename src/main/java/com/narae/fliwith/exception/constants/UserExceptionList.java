@@ -14,7 +14,9 @@ public enum UserExceptionList {
     ALREADY_LOGOUT_ERROR("U0005", HttpStatus.NOT_FOUND, "이미 로그아웃한 사용자입니다."),
     EMAIL_SEND_ERROR("U0006", HttpStatus.NOT_FOUND, "이메일 발송에 실패했습니다."),
     EMAIL_AUTH_ERROR("U0007", HttpStatus.BAD_REQUEST, "유효하지 않은 인증 링크입니다."),
-    REQUIRE_EMAIL_AUTH("U0008", HttpStatus.UNAUTHORIZED, "이메일 인증이 필요한 사용자입니다.")
+    REQUIRE_EMAIL_AUTH("U0008", HttpStatus.UNAUTHORIZED, "이메일 인증이 필요한 사용자입니다."),
+    NON_VALID_USER_PASSWORD("U0009", HttpStatus.NOT_FOUND, "비밀번호가 올바르지 않습니다."),
+    DUPLICATE_USER_PASSWORD("U0010", HttpStatus.CONFLICT, "현재 비밀번호와 같은 비밀번호로 변경할 수 없습니다.")
     ;
 
 
