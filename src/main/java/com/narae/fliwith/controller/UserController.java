@@ -84,4 +84,10 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "임시 비밀번호 발송에 성공했습니다."));
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<BaseRes<Void>> changePassword(@AuthenticationPrincipal CustomUser customUser, @RequestBody NewPasswordReq newPasswordReq) {
+        userService.changePassword(customUser.getEmail(), newPasswordReq);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "비밀번호 변경에 성공했습니다."));
+    }
+
 }
