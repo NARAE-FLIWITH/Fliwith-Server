@@ -78,4 +78,10 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "이메일 인증에 성공했습니다."));
     }
 
+    @GetMapping("/temporary-password")
+    public ResponseEntity<BaseRes<Void>> temporaryPassword(@RequestParam String email) {
+        userService.temporaryPassword(email);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "임시 비밀번호 발송에 성공했습니다."));
+    }
+
 }

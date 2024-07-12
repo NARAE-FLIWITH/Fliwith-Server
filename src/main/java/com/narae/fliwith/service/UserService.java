@@ -123,4 +123,8 @@ public class UserService {
         user.completeSignup();
     }
 
+    public void temporaryPassword(String email) {
+        User user = authService.authUser(email);
+        mailService.tempoaryPassword(user);
+    }
 }

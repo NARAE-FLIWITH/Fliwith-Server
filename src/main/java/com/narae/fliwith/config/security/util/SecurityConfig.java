@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/nickname").permitAll()
                                 .requestMatchers("/user/reissue").permitAll()
                                 .requestMatchers("/user/authemail").permitAll()
+                                .requestMatchers("/user/temporary-password").permitAll()
                                 .requestMatchers("/user").permitAll()
                                 .requestMatchers("/admin/**").permitAll()
                                 .anyRequest().authenticated()
