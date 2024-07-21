@@ -35,6 +35,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -74,7 +76,10 @@ public class TourService {
                 .bodyToMono(new ParameterizedTypeReference<DetailWithTourRes.Root>() {
                 })
                 .map(root -> root.getResponse().getBody().getItems().getItem().get(0))
-                .onErrorReturn(DecodingException.class, new DetailWithTourRes.Item());
+                .onErrorReturn(DecodingException.class, new DetailWithTourRes.Item())
+                .onErrorReturn(WebClientResponseException.class, new DetailWithTourRes.Item())
+                .onErrorReturn(WebClientRequestException.class, new DetailWithTourRes.Item());
+
 
     }
 
