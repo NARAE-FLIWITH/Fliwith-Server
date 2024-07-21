@@ -265,12 +265,12 @@ public class TourService {
                 }
 
                 pageNo++;
-                if(askList.size()>=10){
+                if(askList.size()>=5){
                     break;
                 }
 
             } while ((pageNo - 1) * itemsPerPage < totalItems);
-            if(askList.size()>=10){
+            if(askList.size()>=5){
                 break;
             }
         }
