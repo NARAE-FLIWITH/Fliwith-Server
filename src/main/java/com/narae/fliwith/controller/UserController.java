@@ -90,4 +90,10 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "비밀번호 변경에 성공했습니다."));
     }
 
+    @PostMapping("/change-nickname")
+    public ResponseEntity<BaseRes<Void>> changeNickname(@AuthenticationPrincipal CustomUser customUser, @RequestBody NicknameReq nicknameReq) {
+        userService.changeNickname(customUser.getEmail(), nicknameReq);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "닉네임 변경에 성공했습니다."));
+    }
+
 }

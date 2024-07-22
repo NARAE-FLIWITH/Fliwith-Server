@@ -16,7 +16,8 @@ public enum UserExceptionList {
     EMAIL_AUTH_ERROR("U0007", HttpStatus.BAD_REQUEST, "유효하지 않은 인증 링크입니다."),
     REQUIRE_EMAIL_AUTH("U0008", HttpStatus.UNAUTHORIZED, "이메일 인증이 필요한 사용자입니다."),
     NON_VALID_USER_PASSWORD("U0009", HttpStatus.NOT_FOUND, "비밀번호가 올바르지 않습니다."),
-    DUPLICATE_USER_PASSWORD("U0010", HttpStatus.CONFLICT, "현재 비밀번호와 같은 비밀번호로 변경할 수 없습니다.")
+    DUPLICATE_USER_PASSWORD("U0010", HttpStatus.CONFLICT, "현재 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
+    DUPLICATE_PREVIOUS_NICKNAME("U0011", HttpStatus.CONFLICT, "현재 닉네임과 동일한 닉네임으로 변경할 수 없습니다.")
     ;
 
 
