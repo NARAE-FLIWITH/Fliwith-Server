@@ -13,6 +13,7 @@ import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.AlreadyLogoutException;
+import com.narae.fliwith.exception.user.DuplicatePreviousNicknameException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
 import com.narae.fliwith.exception.user.DuplicateUserPasswordException;
@@ -144,4 +145,23 @@ public class UserService {
             throw new NonValidUserPasswordException();
         }
     }
+
+    public void changeNickname(String email, NicknameReq newNicknameReq){
+        User user = authService.authUser(email);
+
+        String newNickname = newNicknameReq.getNickname();
+        //이전과 동일한 닉네임 불가
+        if(user.getNickname().equals(newNickname)){
+            throw new DuplicatePreviousNicknameException();
+        }
+
+        //중복확인
+        if(userRepository.existsByNickname(newNickname)){
+            throw new DuplicateUserNicknameException();
+        }
+
+        //닉네임 변경
+        user.changeNickname(newNickname);
+    }
+
 }

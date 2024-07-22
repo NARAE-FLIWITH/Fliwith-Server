@@ -35,4 +35,8 @@ public class User {
     public void changePWd(String encodedPw) {
         pw = encodedPw;
     }
+
+    public void changeNickname(String newNickname) {
+        nickname = newNickname;
+    }
 }
