@@ -40,7 +40,6 @@ public class TourRes {
         DetailWithTourRes.Item detailWithTour;
         DetailIntroRes.Item detailIntro;
         DetailCommonRes.Item detailCommon;
-        List<ReviewItem> reviews;
 
     }
 

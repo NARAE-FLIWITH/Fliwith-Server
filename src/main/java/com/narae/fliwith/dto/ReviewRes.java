@@ -59,4 +59,25 @@ public class ReviewRes {
     public static class LikeUnlikeRes{
         boolean like;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ReviewContentItem{
+        private Long reviewId;
+        private String image;
+        private String content;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ReviewContentRes{
+        List<ReviewContentItem> reviews;
+        int pageNo;
+        int lastPageNo;
+
+    }
 }

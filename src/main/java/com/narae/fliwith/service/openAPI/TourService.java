@@ -5,7 +5,8 @@ import com.narae.fliwith.domain.Location;
 import com.narae.fliwith.domain.Review;
 import com.narae.fliwith.domain.Spot;
 import com.narae.fliwith.domain.User;
-import com.narae.fliwith.dto.ReviewRes.ReviewItem;
+import com.narae.fliwith.dto.ReviewRes.ReviewContentItem;
+import com.narae.fliwith.dto.ReviewRes.ReviewContentRes;
 import com.narae.fliwith.dto.TourReq.AiTourParams;
 import com.narae.fliwith.dto.TourReq.AiTourReq;
 import com.narae.fliwith.dto.TourRes.TourAsk;
@@ -142,19 +143,32 @@ public class TourService {
         DetailIntroRes.Item detailIntro = getDetailIntro(contentId, contentTypeId).block();
         DetailCommonRes.Item detailCommon = getDetailCommon(contentId).block();
 
-        Pageable pageable = PageRequest.of(0, 10); // 0은 페이지 번호, 10은 페이지 크기
+        return TourDetailRes.builder()
+                .detailWithTour(detailWithTour)
+                .detailIntro(detailIntro)
+                .detailCommon(detailCommon)
+                .build();
+    }
+
+    public ReviewContentRes getTourReviewContentPageList(String email, String contentId, int pageNo){
+        User user = authService.authUser(email);
+
+        Pageable pageable = PageRequest.of(pageNo, 10); // pageNo은 페이지 번호, 10은 페이지 크기
         Spot spot = spotRepository.findById(Integer.parseInt(contentId)).orElseThrow(SpotFindFailException::new);
 
         Page<Review> reviewsPage = reviewRepository.findAllBySpotOrderByCreatedAtDesc(spot, pageable);
         List<Review> reviews = reviewsPage.getContent();
 
-        return TourDetailRes.builder()
-                .detailWithTour(detailWithTour)
-                .detailIntro(detailIntro)
-                .detailCommon(detailCommon)
-                .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
+        int lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
+
+        return ReviewContentRes.builder()
+                .reviews(reviews.stream().map(review -> new ReviewContentItem(review.getId(), review.getImages().get(0).getUrl(), review.getContent())).collect(
                         Collectors.toList()))
+                .pageNo(pageNo)
+                .lastPageNo(lastPageNo)
                 .build();
+
+
     }
 
     public AreaBasedListRes.Response getAreaBasedList(String contentTypeId, int pageNo) {

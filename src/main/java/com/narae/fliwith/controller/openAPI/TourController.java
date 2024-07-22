@@ -1,6 +1,7 @@
 package com.narae.fliwith.controller.openAPI;
 
 import com.narae.fliwith.config.security.dto.CustomUser;
+import com.narae.fliwith.dto.ReviewRes.ReviewContentRes;
 import com.narae.fliwith.dto.TourReq.AiTourReq;
 import com.narae.fliwith.dto.TourRes.TourDetailRes;
 import com.narae.fliwith.dto.TourRes.TourType;
@@ -40,6 +41,12 @@ public class TourController {
     public ResponseEntity<BaseRes<TourDetailRes>> getTour(@AuthenticationPrincipal CustomUser customUser, @PathVariable(value = "contentTypeId")String contentTypeId, @PathVariable(value = "contentId") String contentId){
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 상세 조회에 성공했습니다.", tourService.getTour(
                 customUser.getEmail(), contentTypeId, contentId)));
+
+    }
+
+    @GetMapping("/tour/review/{contentId}")
+    public ResponseEntity<BaseRes<ReviewContentRes>> getTourReviewContentPageList(@AuthenticationPrincipal CustomUser customUser, @PathVariable(value = "contentId") String contentId, @RequestParam int pageNo){
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 리뷰 목록 조회에 성공했습니다.", tourService.getTourReviewContentPageList(customUser.getEmail(), contentId, pageNo)));
 
     }
 
