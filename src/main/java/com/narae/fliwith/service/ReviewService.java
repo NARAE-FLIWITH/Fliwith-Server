@@ -135,14 +135,17 @@ public class ReviewService {
         Page<Review> reviewsPage;
         List<Review> reviews;
         int lastPageNo;
-        //최신순 recent
+        //최신순 recent - 이미지 없는 리뷰
         if("recent".equals(order)){
             reviewsPage = reviewRepository.findAllByOrderByCreatedAtDesc(pageable);
             reviews = reviewsPage.getContent();
             lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(),
-                            (long) review.getLikes().size())).collect(
+                    .reviews(reviews.stream().map(review -> {
+                        String imageUrl = review.getImages().isEmpty()? "" : review.getImages().get(0).getUrl();
+                        return new ReviewItem(review.getId(), imageUrl, review.getUser().getNickname(), review.getUser().getDisability(),
+                                (long) review.getLikes().size());
+                    }).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
                     .lastPageNo(lastPageNo)
@@ -157,7 +160,11 @@ public class ReviewService {
             reviews = reviewsPage.getContent();
             lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
-                    .reviews(reviews.stream().map(review -> new ReviewItem(review.getId(), review.getImages().get(0).getUrl(), review.getUser().getNickname(), review.getUser().getDisability(), (long) review.getLikes().size())).collect(
+                    .reviews(reviews.stream().map(review -> {
+                        String imageUrl = review.getImages().isEmpty()? "" : review.getImages().get(0).getUrl();
+                        return new ReviewItem(review.getId(), imageUrl, review.getUser().getNickname(), review.getUser().getDisability(),
+                                (long) review.getLikes().size());
+                    }).collect(
                             Collectors.toList()))
                     .pageNo(pageNo)
                     .lastPageNo(lastPageNo)
