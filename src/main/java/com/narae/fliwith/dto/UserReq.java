@@ -50,7 +50,6 @@ public class UserReq {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class NewPasswordReq{
-        private String email;
         private String currentPassword;
         private String newPassword;
     }
