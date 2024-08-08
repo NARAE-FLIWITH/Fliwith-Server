@@ -34,6 +34,12 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "이메일 회원가입에 성공했습니다."));
     }
 
+    @PostMapping("/signup/kakao")
+    public ResponseEntity<BaseRes<Void>> kakaoSignUp(@RequestBody KakaoSignUpReq signUpReq){
+        userService.kakaoSignUp(signUpReq);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "카카오 회원가입에 성공했습니다."));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<BaseRes<TokenRes>> signUp(@RequestBody LogInReq logInReq) {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "로그인에 성공했습니다.", userService.logIn(logInReq)));

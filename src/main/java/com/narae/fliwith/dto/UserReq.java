@@ -24,6 +24,16 @@ public class UserReq {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class KakaoSignUpReq {
+        private Long kakaoId;
+        private String nickname;
+        private Disability disability;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class LogInReq {
         private String email;
         private String password;

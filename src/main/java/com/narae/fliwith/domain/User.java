@@ -29,7 +29,6 @@ public class User {
     private String auth;
     //TODO: 탈퇴상태 추가
 
-    @ColumnDefault("-1")
     private Long kakaoId;
 
 

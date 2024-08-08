@@ -14,6 +14,7 @@ import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.AlreadyLogoutException;
+import com.narae.fliwith.exception.user.DuplicateKakaoIdException;
 import com.narae.fliwith.exception.user.DuplicatePreviousNicknameException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
@@ -46,6 +47,8 @@ public class UserService {
             throw new DuplicateUserEmailException();
         }
 
+        nicknameCheck(new NicknameReq(signUpReq.getNickname()));
+
         String encodedPassword = passwordEncoder.encode(signUpReq.getPassword());
 
         User user = User.builder()
@@ -60,6 +63,24 @@ public class UserService {
 
         user = userRepository.save(user);
         mailService.sendMail(user);
+
+    }
+
+    public void kakaoSignUp(UserReq.KakaoSignUpReq signUpReq) {
+        if(userRepository.existsByKakaoId(signUpReq.getKakaoId())){
+            throw new DuplicateKakaoIdException();
+        }
+
+        nicknameCheck(new NicknameReq(signUpReq.getNickname()));
+
+        User user = User.builder()
+                .role(Role.ROLE_USER)
+                .nickname(signUpReq.getNickname())
+                .disability(signUpReq.getDisability())
+                .signupStatus(SignupStatus.COMPLETE)
+                .build();
+
+        userRepository.save(user);
 
     }
 
