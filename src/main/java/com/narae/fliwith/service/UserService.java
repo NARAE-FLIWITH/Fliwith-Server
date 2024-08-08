@@ -1,5 +1,6 @@
 package com.narae.fliwith.service;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.config.security.util.TokenUtil;
 import com.narae.fliwith.domain.Role;
@@ -63,7 +64,7 @@ public class UserService {
     }
 
     public TokenRes logIn(UserReq.LogInReq logInReq) {
-        User user = authService.authUser(logInReq.getEmail());
+        User user = authService.authEmailUser(logInReq.getEmail());
 
         if(passwordEncoder.matches(logInReq.getPassword(), user.getPw())){
             tokenUtil.makeAuthentication(user);
@@ -96,8 +97,8 @@ public class UserService {
 
     }
 
-    public ProfileRes getProfile(String email) {
-        User user = authService.authUser(email);
+    public ProfileRes getProfile(CustomUser customUser) {
+        User user = authService.authUser(customUser);
 
         return ProfileRes.builder()
                 .disability(user.getDisability())
@@ -115,8 +116,8 @@ public class UserService {
         throw new InvalidTokenException();
     }
 
-    public void logout(String email) {
-        User user = authService.authUser(email);
+    public void logout(CustomUser customUser) {
+        User user = authService.authUser(customUser);
         Token token = tokenRepository.findByUser(user).orElseThrow(AlreadyLogoutException::new);
         tokenRepository.delete(token);
 
@@ -128,12 +129,12 @@ public class UserService {
     }
 
     public void temporaryPassword(String email) {
-        User user = authService.authUser(email);
+        User user = authService.authEmailUser(email);
         mailService.tempoaryPassword(user);
     }
 
     public void changePassword(String email, NewPasswordReq newPasswordReq) {
-        User user = authService.authUser(email);
+        User user = authService.authEmailUser(email);
         if(newPasswordReq.getCurrentPassword().equals(newPasswordReq.getNewPassword())){
             throw new DuplicateUserPasswordException();
         }
@@ -146,8 +147,8 @@ public class UserService {
         }
     }
 
-    public void changeNickname(String email, NicknameReq newNicknameReq){
-        User user = authService.authUser(email);
+    public void changeNickname(CustomUser customUser, NicknameReq newNicknameReq){
+        User user = authService.authUser(customUser);
 
         String newNickname = newNicknameReq.getNickname();
         //이전과 동일한 닉네임 불가

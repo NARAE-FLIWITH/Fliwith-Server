@@ -108,6 +108,7 @@ public class TokenUtil implements InitializingBean {
         // Authentication 정보 만들기
         CustomUser customUser = CustomUser.builder()
                 .email(user.getEmail())
+                .kakaoId(user.getKakaoId())
                 .roles(Arrays.asList(user.getRole().toString()))
                 .build();
 

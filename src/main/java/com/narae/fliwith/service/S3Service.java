@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.dto.ImageReq.PresignedUrlReq;
 import com.narae.fliwith.dto.ImageRes;
@@ -36,8 +37,8 @@ public class S3Service {
     private final AuthService authService;
 
 
-    public ImageRes.PresignedUrlRes issuePresignedUrl(String email, PresignedUrlReq presignedUrlReq){
-        User user = authService.authUser(email);
+    public ImageRes.PresignedUrlRes issuePresignedUrl(CustomUser customUser, PresignedUrlReq presignedUrlReq){
+        User user = authService.authUser(customUser);
 
         String imageName = folder+UUID.randomUUID()+"."+presignedUrlReq.getImageExtension().getUploadExtension();
 

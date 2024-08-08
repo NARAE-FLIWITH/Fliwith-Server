@@ -53,7 +53,7 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<BaseRes<ProfileRes>> getProfile(@AuthenticationPrincipal CustomUser customUser){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "프로필 조회에 성공했습니다.", userService.getProfile(customUser.getEmail())));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "프로필 조회에 성공했습니다.", userService.getProfile(customUser)));
     }
 
     @GetMapping("/reissue")
@@ -63,7 +63,7 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<BaseRes<Void>> logout(@AuthenticationPrincipal CustomUser customUser) {
-        userService.logout(customUser.getEmail());
+        userService.logout(customUser);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "로그아웃에 성공했습니다."));
     }
 
@@ -92,7 +92,7 @@ public class UserController {
 
     @PostMapping("/change-nickname")
     public ResponseEntity<BaseRes<Void>> changeNickname(@AuthenticationPrincipal CustomUser customUser, @RequestBody NicknameReq nicknameReq) {
-        userService.changeNickname(customUser.getEmail(), nicknameReq);
+        userService.changeNickname(customUser, nicknameReq);
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "닉네임 변경에 성공했습니다."));
     }
 
