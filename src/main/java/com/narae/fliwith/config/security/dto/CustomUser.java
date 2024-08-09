@@ -13,5 +13,6 @@ import java.util.List;
 @Data
 public class CustomUser {
     private String email;
+    private Long kakaoId;
     private List<String> roles;
 }

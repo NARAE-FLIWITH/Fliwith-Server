@@ -1,5 +1,6 @@
 package com.narae.fliwith.service.openAPI;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.domain.Disability;
 import com.narae.fliwith.domain.Location;
 import com.narae.fliwith.domain.Review;
@@ -125,8 +126,8 @@ public class TourService {
                 .onErrorReturn(DecodingException.class, new DetailIntroRes.Item());
     }
 
-    public List<TourType> getNearEveryTourType(String email, double latitude, double longitude) {
-        User user = authService.authUser(email);
+    public List<TourType> getNearEveryTourType(CustomUser customUser, double latitude, double longitude) {
+        User user = authService.authUser(customUser);
         return locationRepository.findNearEverySpotType(latitude, longitude).stream()
                 .map(location -> TourType.builder()
                         .contentTypeId(location.getSpot().getContentTypeId())
@@ -136,8 +137,8 @@ public class TourService {
                 .collect(Collectors.toList());
     }
 
-    public TourDetailRes getTour(String email, String contentTypeId, String contentId) {
-        User user = authService.authUser(email);
+    public TourDetailRes getTour(CustomUser customUser, String contentTypeId, String contentId) {
+        User user = authService.authUser(customUser);
 
         DetailWithTourRes.Item detailWithTour = getDetailWithTour(contentId).block();
         DetailIntroRes.Item detailIntro = getDetailIntro(contentId, contentTypeId).block();
@@ -150,8 +151,8 @@ public class TourService {
                 .build();
     }
 
-    public ReviewContentRes getTourReviewContentPageList(String email, String contentId, int pageNo){
-        User user = authService.authUser(email);
+    public ReviewContentRes getTourReviewContentPageList(CustomUser customUser, String contentId, int pageNo){
+        User user = authService.authUser(customUser);
 
         Pageable pageable = PageRequest.of(pageNo, 10); // pageNo은 페이지 번호, 10은 페이지 크기
         Spot spot = spotRepository.findById(Integer.parseInt(contentId)).orElseThrow(SpotFindFailException::new);
@@ -247,8 +248,8 @@ public class TourService {
                 .blockFirst();
     }
 
-    public TourDetailRes getAiTour(String email, AiTourReq aiTourReq) {
-        User user = authService.authUser(email);
+    public TourDetailRes getAiTour(CustomUser customUser, AiTourReq aiTourReq) {
+        User user = authService.authUser(customUser);
 
         AiTourParams params = AiTourParams.from(aiTourReq);
         List<TourAsk> askList = new ArrayList<>();
@@ -300,7 +301,7 @@ public class TourService {
 //            System.out.println(gptAnswer);
             TourAsk gptChoice = askList.stream().filter(tourAsk -> gptRecommend.contains(tourAsk.getName())).findFirst().get();
             //TODO: auth 중복 로직 해결
-            return getTour(email, gptChoice.getContentTypeId(), gptChoice.getContentId());
+            return getTour(customUser, gptChoice.getContentTypeId(), gptChoice.getContentId());
         }
 
 

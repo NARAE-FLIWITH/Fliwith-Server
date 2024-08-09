@@ -1,5 +1,6 @@
 package com.narae.fliwith.service;
 
+import com.narae.fliwith.config.security.dto.CustomUser;
 import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.config.security.util.TokenUtil;
 import com.narae.fliwith.domain.Role;
@@ -13,6 +14,7 @@ import com.narae.fliwith.dto.UserReq.NicknameReq;
 import com.narae.fliwith.dto.UserRes.ProfileRes;
 import com.narae.fliwith.exception.security.InvalidTokenException;
 import com.narae.fliwith.exception.user.AlreadyLogoutException;
+import com.narae.fliwith.exception.user.DuplicateKakaoIdException;
 import com.narae.fliwith.exception.user.DuplicatePreviousNicknameException;
 import com.narae.fliwith.exception.user.DuplicateUserEmailException;
 import com.narae.fliwith.exception.user.DuplicateUserNicknameException;
@@ -45,6 +47,8 @@ public class UserService {
             throw new DuplicateUserEmailException();
         }
 
+        nicknameCheck(new NicknameReq(signUpReq.getNickname()));
+
         String encodedPassword = passwordEncoder.encode(signUpReq.getPassword());
 
         User user = User.builder()
@@ -62,8 +66,27 @@ public class UserService {
 
     }
 
+    public void kakaoSignUp(UserReq.KakaoSignUpReq signUpReq) {
+        if(userRepository.existsByKakaoId(signUpReq.getKakaoId())){
+            throw new DuplicateKakaoIdException();
+        }
+
+        nicknameCheck(new NicknameReq(signUpReq.getNickname()));
+
+        User user = User.builder()
+                .role(Role.ROLE_USER)
+                .nickname(signUpReq.getNickname())
+                .disability(signUpReq.getDisability())
+                .signupStatus(SignupStatus.COMPLETE)
+                .kakaoId(signUpReq.getKakaoId())
+                .build();
+
+        userRepository.save(user);
+
+    }
+
     public TokenRes logIn(UserReq.LogInReq logInReq) {
-        User user = authService.authUser(logInReq.getEmail());
+        User user = authService.authEmailUser(logInReq.getEmail());
 
         if(passwordEncoder.matches(logInReq.getPassword(), user.getPw())){
             tokenUtil.makeAuthentication(user);
@@ -82,6 +105,21 @@ public class UserService {
 
     }
 
+    public TokenRes kakaoLogIn(UserReq.KakaoLogInReq logInReq) {
+        User user = authService.authKakaoUser(logInReq.getKakaoId());
+
+        TokenRes tokenRes = tokenUtil.token(user);
+
+        Token token = Token.builder()
+                .user(user)
+                .refreshToken(tokenRes.getRefreshToken())
+                .build();
+        tokenRepository.findByUser(user).ifPresent(t->tokenRepository.delete(t));
+        tokenRepository.save(token);
+        return tokenRes;
+
+    }
+
     public void emailCheck(EmailReq emailReq) {
         if(userRepository.existsByEmail(emailReq.getEmail())){
             throw new DuplicateUserEmailException();
@@ -96,8 +134,8 @@ public class UserService {
 
     }
 
-    public ProfileRes getProfile(String email) {
-        User user = authService.authUser(email);
+    public ProfileRes getProfile(CustomUser customUser) {
+        User user = authService.authUser(customUser);
 
         return ProfileRes.builder()
                 .disability(user.getDisability())
@@ -115,8 +153,8 @@ public class UserService {
         throw new InvalidTokenException();
     }
 
-    public void logout(String email) {
-        User user = authService.authUser(email);
+    public void logout(CustomUser customUser) {
+        User user = authService.authUser(customUser);
         Token token = tokenRepository.findByUser(user).orElseThrow(AlreadyLogoutException::new);
         tokenRepository.delete(token);
 
@@ -128,12 +166,12 @@ public class UserService {
     }
 
     public void temporaryPassword(String email) {
-        User user = authService.authUser(email);
+        User user = authService.authEmailUser(email);
         mailService.tempoaryPassword(user);
     }
 
     public void changePassword(String email, NewPasswordReq newPasswordReq) {
-        User user = authService.authUser(email);
+        User user = authService.authEmailUser(email);
         if(newPasswordReq.getCurrentPassword().equals(newPasswordReq.getNewPassword())){
             throw new DuplicateUserPasswordException();
         }
@@ -146,8 +184,8 @@ public class UserService {
         }
     }
 
-    public void changeNickname(String email, NicknameReq newNicknameReq){
-        User user = authService.authUser(email);
+    public void changeNickname(CustomUser customUser, NicknameReq newNicknameReq){
+        User user = authService.authUser(customUser);
 
         String newNickname = newNicknameReq.getNickname();
         //이전과 동일한 닉네임 불가

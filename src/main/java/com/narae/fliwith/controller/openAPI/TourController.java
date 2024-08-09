@@ -34,19 +34,19 @@ public class TourController {
     @GetMapping("/tour")
     public ResponseEntity<BaseRes<List<TourType>>> getTourByType(@AuthenticationPrincipal CustomUser customUser, @RequestParam double latitude, @RequestParam double longitude){
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "위치기반 모든 유형의 관광지 목록 조회에 성공했습니다.", tourService.getNearEveryTourType(
-                customUser.getEmail(), latitude, longitude)));
+                customUser, latitude, longitude)));
     }
 
     @GetMapping("/tour/{contentTypeId}/{contentId}")
     public ResponseEntity<BaseRes<TourDetailRes>> getTour(@AuthenticationPrincipal CustomUser customUser, @PathVariable(value = "contentTypeId")String contentTypeId, @PathVariable(value = "contentId") String contentId){
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 상세 조회에 성공했습니다.", tourService.getTour(
-                customUser.getEmail(), contentTypeId, contentId)));
+                customUser, contentTypeId, contentId)));
 
     }
 
     @GetMapping("/tour/review/{contentId}")
     public ResponseEntity<BaseRes<ReviewContentRes>> getTourReviewContentPageList(@AuthenticationPrincipal CustomUser customUser, @PathVariable(value = "contentId") String contentId, @RequestParam int pageNo){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 리뷰 목록 조회에 성공했습니다.", tourService.getTourReviewContentPageList(customUser.getEmail(), contentId, pageNo)));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "관광지 리뷰 목록 조회에 성공했습니다.", tourService.getTourReviewContentPageList(customUser, contentId, pageNo)));
 
     }
 
@@ -58,7 +58,7 @@ public class TourController {
 
     @PostMapping("/tour/ai")
     public ResponseEntity<BaseRes<TourDetailRes>> getAiTour(@AuthenticationPrincipal CustomUser customUser,  @RequestBody AiTourReq aiTourReq){
-        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "추천 관광지를 찾는데 성공했습니다.", tourService.getAiTour(customUser.getEmail(), aiTourReq)));
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "추천 관광지를 찾는데 성공했습니다.", tourService.getAiTour(customUser, aiTourReq)));
 
     }
 

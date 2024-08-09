@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Builder
@@ -27,6 +28,9 @@ public class User {
     private SignupStatus signupStatus;
     private String auth;
     //TODO: 탈퇴상태 추가
+
+    private Long kakaoId;
+
 
     public void completeSignup(){
         signupStatus = SignupStatus.COMPLETE;
