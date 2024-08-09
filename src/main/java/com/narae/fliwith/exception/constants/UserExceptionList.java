@@ -18,7 +18,8 @@ public enum UserExceptionList {
     NON_VALID_USER_PASSWORD("U0009", HttpStatus.NOT_FOUND, "비밀번호가 올바르지 않습니다."),
     DUPLICATE_USER_PASSWORD("U0010", HttpStatus.CONFLICT, "현재 비밀번호와 동일한 비밀번호로 변경할 수 없습니다."),
     DUPLICATE_PREVIOUS_NICKNAME("U0011", HttpStatus.CONFLICT, "현재 닉네임과 동일한 닉네임으로 변경할 수 없습니다."),
-    DUPLICATE_KAKAO_ID("U0012", HttpStatus.CONFLICT, "이미 가입된 카카오 계정입니다.")
+    DUPLICATE_KAKAO_ID("U0012", HttpStatus.CONFLICT, "이미 가입된 카카오 계정입니다."),
+    NON_KAKAO_REGISTER_USER("U0013", HttpStatus.BAD_REQUEST, "카카오 계정으로 가입한 아이디가 없습니다.")
 
     ;
 

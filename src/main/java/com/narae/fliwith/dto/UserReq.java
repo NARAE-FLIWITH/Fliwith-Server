@@ -43,6 +43,14 @@ public class UserReq {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class KakaoLogInReq {
+        private Long kakaoId;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class EmailReq{
         private String email;
     }

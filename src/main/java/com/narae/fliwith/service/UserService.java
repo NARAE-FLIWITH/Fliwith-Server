@@ -78,6 +78,7 @@ public class UserService {
                 .nickname(signUpReq.getNickname())
                 .disability(signUpReq.getDisability())
                 .signupStatus(SignupStatus.COMPLETE)
+                .kakaoId(signUpReq.getKakaoId())
                 .build();
 
         userRepository.save(user);
@@ -101,6 +102,21 @@ public class UserService {
         } else{
             throw new LogInFailException();
         }
+
+    }
+
+    public TokenRes kakaoLogIn(UserReq.KakaoLogInReq logInReq) {
+        User user = authService.authKakaoUser(logInReq.getKakaoId());
+
+        TokenRes tokenRes = tokenUtil.token(user);
+
+        Token token = Token.builder()
+                .user(user)
+                .refreshToken(tokenRes.getRefreshToken())
+                .build();
+        tokenRepository.findByUser(user).ifPresent(t->tokenRepository.delete(t));
+        tokenRepository.save(token);
+        return tokenRes;
 
     }
 

@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authorize -> authorize
                                 .requestMatchers("/user/signup/**").permitAll()
-                                .requestMatchers("/user/login").permitAll()
+                                .requestMatchers("/user/login/**").permitAll()
                                 .requestMatchers("/user/email").permitAll()
                                 .requestMatchers("/user/nickname").permitAll()
                                 .requestMatchers("/user/reissue").permitAll()
