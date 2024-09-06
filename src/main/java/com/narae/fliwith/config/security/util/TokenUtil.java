@@ -12,6 +12,7 @@ import com.narae.fliwith.config.security.dto.TokenRes;
 import com.narae.fliwith.domain.Token;
 import com.narae.fliwith.domain.User;
 import com.narae.fliwith.exception.security.InvalidTokenException;
+import com.narae.fliwith.exception.user.NonValidSignupUserException;
 import com.narae.fliwith.exception.user.NotFoundUserException;
 import com.narae.fliwith.repository.TokenRepository;
 import com.narae.fliwith.repository.UserRepository;
@@ -72,7 +73,7 @@ public class TokenUtil implements InitializingBean {
         Date accessTokenExpiresIn = new Date(now.getTime() + accessTokenExpireTime);
         String accessToken = Jwts.builder()
                 .setClaims(claims)
-                .setSubject(user.getEmail())
+                .setSubject(getSubject(user))
                 .setIssuedAt(now)
                 .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
@@ -83,7 +84,7 @@ public class TokenUtil implements InitializingBean {
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now.getTime() + refreshTokenExpireTime))
                 .signWith(key, SignatureAlgorithm.HS512)
-                .setSubject(user.getEmail())
+                .setSubject(getSubject(user))
                 .compact();
 
         return TokenRes.builder()
@@ -92,6 +93,24 @@ public class TokenUtil implements InitializingBean {
                 .refreshTokenExpirationTime(refreshTokenExpiresIn.getTime())
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    private String getSubject(User user){
+        String email = user.getEmail();
+        Long kakaoId = user.getKakaoId();
+        if(email != null && kakaoId != null){
+            throw new NonValidSignupUserException();
+        }
+
+        if(email != null){
+            return email;
+        }
+
+        if(kakaoId != null){
+            return kakaoId.toString();
+        }
+
+        throw new NonValidSignupUserException();
     }
 
     public Authentication getAuthentication(CustomUser user) {
@@ -147,8 +166,13 @@ public class TokenUtil implements InitializingBean {
 
     public TokenRes reissue(String token){
         //사용자가 보낸 refreshToken으로 user를 찾고
-        String userEmail = getSubject(token);
-        User user = userRepository.findByEmail(userEmail).orElseThrow(NotFoundUserException::new);
+        String subject = getSubject(token);
+        User user;
+        if(subject.contains("@")){
+            user = userRepository.findByEmail(subject).orElseThrow(NotFoundUserException::new);
+        } else{
+            user = userRepository.findByKakaoId(Long.parseLong(subject)).orElseThrow(NotFoundUserException::new);
+        }
 
         //찾은 user로 저장되어있는 refreshToken을 가져오고
         Token preToken = tokenRepository.findByUser(user).orElseThrow(InvalidTokenException::new);
@@ -180,8 +204,8 @@ public class TokenUtil implements InitializingBean {
     }
 
     private Claims getClaims(com.narae.fliwith.domain.User user) {
-        // claim 에 email 정보 추가
-        Claims claims = Jwts.claims().setSubject(user.getEmail()).build();
+        // claim 에 email/kakaoId 정보 추가
+        Claims claims = Jwts.claims().setSubject(getSubject(user)).build();
         return claims;
     }
 }
