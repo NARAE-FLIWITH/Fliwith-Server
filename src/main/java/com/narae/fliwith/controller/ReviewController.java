@@ -75,5 +75,10 @@ public class ReviewController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "내가 작성한 리뷰 목록 조회에 성공했습니다.", reviewService.getReviewWriteList(customUser, pageNo)));
     }
 
+    @PostMapping("/block/{reviewId}")
+    public ResponseEntity<BaseRes<Void>> blockReview(@AuthenticationPrincipal CustomUser customUser, @PathVariable Long reviewId) {
+        reviewService.blockReview(customUser, reviewId);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "리뷰 차단에 성공했습니다."));
+    }
 
 }

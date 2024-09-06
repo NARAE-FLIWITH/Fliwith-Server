@@ -1,6 +1,7 @@
 package com.narae.fliwith.service;
 
 import com.narae.fliwith.config.security.dto.CustomUser;
+import com.narae.fliwith.domain.Block;
 import com.narae.fliwith.domain.Image;
 import com.narae.fliwith.domain.Like;
 import com.narae.fliwith.domain.Review;
@@ -12,11 +13,13 @@ import com.narae.fliwith.dto.ReviewRes.LikeUnlikeRes;
 import com.narae.fliwith.dto.ReviewRes.ReviewItem;
 import com.narae.fliwith.dto.ReviewRes.ReviewItemRes;
 import com.narae.fliwith.dto.TourRes.TourName;
+import com.narae.fliwith.exception.review.AlreadyBlockedReview;
 import com.narae.fliwith.exception.review.ReviewAccessFailException;
+import com.narae.fliwith.exception.review.ReviewBlockFailException;
 import com.narae.fliwith.exception.review.ReviewFindFailException;
 import com.narae.fliwith.exception.review.ReviewListException;
 import com.narae.fliwith.exception.spot.SpotFindFailException;
-import com.narae.fliwith.exception.user.LogInFailException;
+import com.narae.fliwith.repository.BlockRepository;
 import com.narae.fliwith.repository.LikeRepository;
 import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.SpotRepository;
@@ -41,6 +44,7 @@ public class ReviewService {
     private final SpotRepository spotRepository;
     private final LikeRepository likeRepository;
     private final AuthService authService;
+    private final BlockRepository blockRepository;
 
 
     public void writeReview(CustomUser customUser, ReviewReq.WriteReviewReq req) {
@@ -58,6 +62,9 @@ public class ReviewService {
         User user = authService.authUser(customUser);
 
         Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
+        if(blockRepository.existsByBlockerAndReview(user, review)){
+            throw new AlreadyBlockedReview();
+        }
 
         boolean isMine = user.getId().equals(review.getUser().getId());
 
@@ -138,7 +145,7 @@ public class ReviewService {
         int lastPageNo;
         //최신순 recent - 이미지 없는 리뷰
         if("recent".equals(order)){
-            reviewsPage = reviewRepository.findAllByOrderByCreatedAtDesc(pageable);
+            reviewsPage = reviewRepository.findAllOrderByCreatedAtDescExcludingBlocked(user, pageable);
             reviews = reviewsPage.getContent();
             lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
@@ -157,7 +164,7 @@ public class ReviewService {
 
         //인기순 like
         if("like".equals(order)){
-            reviewsPage = reviewRepository.findAllByOrderByLikesDescCreatedAtDesc(pageable);
+            reviewsPage = reviewRepository.findAllOrderByLikesDescExcludingBlocked(user, pageable);
             reviews = reviewsPage.getContent();
             lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);
             return ReviewItemRes.builder()
@@ -237,6 +244,31 @@ public class ReviewService {
                 .pageNo(pageNo)
                 .lastPageNo(lastPageNo)
                 .build();
+
+    }
+
+    public void blockReview(CustomUser customUser, Long reviewId) {
+        User user = authService.authUser(customUser);
+
+        Review review = reviewRepository.findById(reviewId).orElseThrow(ReviewFindFailException::new);
+
+        if(review.getUser().equals(user)){
+            throw new ReviewBlockFailException();
+        }
+
+        if(blockRepository.existsByBlockerAndReview(user, review)){
+            throw new AlreadyBlockedReview();
+        }
+
+        //좋아요 되어있으면 좋아요 해제
+        likeRepository.findByLikerAndReview(user, review).ifPresent(likeRepository::delete);
+
+        Block block = Block.builder()
+                .blocker(user)
+                .review(review)
+                .build();
+
+        blockRepository.save(block);
 
     }
 }
