@@ -157,7 +157,7 @@ public class TourService {
         Pageable pageable = PageRequest.of(pageNo, 10); // pageNo은 페이지 번호, 10은 페이지 크기
         Spot spot = spotRepository.findById(Integer.parseInt(contentId)).orElseThrow(SpotFindFailException::new);
 
-        Page<Review> reviewsPage = reviewRepository.findAllBySpotOrderByCreatedAtDesc(spot, pageable);
+        Page<Review> reviewsPage = reviewRepository.findAllBySpotOrderByCreatedAtDescExcludingBlocked(spot, user, pageable);
         List<Review> reviews = reviewsPage.getContent();
 
         int lastPageNo = Math.max(reviewsPage.getTotalPages() - 1, 0);

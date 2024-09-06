@@ -107,4 +107,10 @@ public class UserController {
         return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "닉네임 변경에 성공했습니다."));
     }
 
+    @PostMapping("/withdraw")
+    public ResponseEntity<BaseRes<Void>> withdraw(@AuthenticationPrincipal CustomUser customUser) {
+        userService.withdraw(customUser);
+        return ResponseEntity.ok(BaseRes.create(HttpStatus.OK.value(), "회원 탈퇴에 성공했습니다."));
+    }
+
 }

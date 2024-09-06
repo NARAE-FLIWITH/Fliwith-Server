@@ -28,8 +28,13 @@ public class JwtFilter extends OncePerRequestFilter {
         // 2. validateToken 으로 토큰 유효성 검사
         // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 SecurityContext 에 저장
         if (StringUtils.hasText(jwt) && tokenUtil.validateToken(jwt, request)) {
-            String userEmail = tokenUtil.getSubject(jwt);
-            User user = userRepository.findByEmail(userEmail).orElseThrow(NotFoundUserException::new);
+            String subject = tokenUtil.getSubject(jwt);
+            User user;
+            if(subject.contains("@")){
+                user = userRepository.findByEmail(subject).orElseThrow(NotFoundUserException::new);
+            } else{
+                user = userRepository.findByKakaoId(Long.parseLong(subject)).orElseThrow(NotFoundUserException::new);
+            }
             tokenUtil.makeAuthentication(user);
         }
 

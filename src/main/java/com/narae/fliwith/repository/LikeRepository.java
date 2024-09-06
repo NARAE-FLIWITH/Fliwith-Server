@@ -18,4 +18,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Page<Review> findLikedReviewsByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 
     boolean existsByLikerAndReview(User liker, Review review);
+
+    void deleteAllByLiker(User liker);
 }

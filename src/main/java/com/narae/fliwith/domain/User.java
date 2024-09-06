@@ -1,6 +1,8 @@
 package com.narae.fliwith.domain;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +32,9 @@ public class User {
     //TODO: 탈퇴상태 추가
 
     private Long kakaoId;
+
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Block> blocks = new ArrayList<>();
 
 
     public void completeSignup(){
