@@ -22,6 +22,8 @@ import com.narae.fliwith.exception.user.DuplicateUserPasswordException;
 import com.narae.fliwith.exception.user.EmailAuthException;
 import com.narae.fliwith.exception.user.LogInFailException;
 import com.narae.fliwith.exception.user.NonValidUserPasswordException;
+import com.narae.fliwith.repository.LikeRepository;
+import com.narae.fliwith.repository.ReviewRepository;
 import com.narae.fliwith.repository.TokenRepository;
 import com.narae.fliwith.repository.UserRepository;
 import jakarta.servlet.ServletRequest;
@@ -41,6 +43,9 @@ public class UserService {
     private final TokenRepository tokenRepository;
     private final MailService mailService;
     private final AuthService authService;
+
+    private final LikeRepository likeRepository;
+    private final ReviewRepository reviewRepository;
 
     public void signUp(UserReq.SignUpReq signUpReq) {
         if(userRepository.existsByEmail(signUpReq.getEmail())){
@@ -202,4 +207,15 @@ public class UserService {
         user.changeNickname(newNickname);
     }
 
+    public void withdraw(CustomUser customUser) {
+        User user = authService.authUser(customUser);
+
+        Token token = tokenRepository.findByUser(user).orElseThrow(AlreadyLogoutException::new);
+        tokenRepository.delete(token);
+
+        likeRepository.deleteAllByLiker(user);
+        reviewRepository.deleteAllByUser(user);
+
+        userRepository.delete(user);
+    }
 }

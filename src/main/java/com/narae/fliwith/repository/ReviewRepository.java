@@ -17,5 +17,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Page<Review> findAllBySpotOrderByCreatedAtDesc(Spot spot, Pageable pageable);
 
+    void deleteAllByUser(User user);
+
 
 }
